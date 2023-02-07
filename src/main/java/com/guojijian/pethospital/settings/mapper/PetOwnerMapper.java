@@ -49,4 +49,9 @@ public interface PetOwnerMapper {
      * 根据用户id和password查询用户
      */
     PetOwner selectPetOwnerByActAndPwd(PetOwner petOwner);
+
+    /**
+     * 添加用户
+     */
+    int insertPetOwner(PetOwner petOwner);
 }

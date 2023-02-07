@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+
+<link th:href="@{/static/jquery/bootstrap_3.3.0/css/bootstrap.min.css}" type="text/css" rel="stylesheet" />
+<link th:href="@{/static/jquery/bootstrap-datetimepicker-master/css/bootstrap-datetimepicker.min.css}" type="text/css" rel="stylesheet" />
+
+<script type="text/javascript" th:src="@{/static/jquery/jquery-1.11.1-min.js}"></script>
+<script type="text/javascript" th:src="@{/static/jquery/bootstrap_3.3.0/js/bootstrap.min.js}"></script>
+<script type="text/javascript" th:src="@{/static/jquery/bootstrap-datetimepicker-master/js/bootstrap-datetimepicker.js}"></script>
+<script type="text/javascript" th:src="@{/static/jquery/bootstrap-datetimepicker-master/locale/bootstrap-datetimepicker.zh-CN.js}"></script>
+<script type="text/javascript" th:src="@{/static/jquery/bs_typeahead/bootstrap3-typeahead.min.js}"></script>
+<script type="text/javascript" th:src="@{/static/jquery/vue.js}"></script>
+<script type="text/javascript" th:src="@{/static/jquery/axios.min.js}"></script>
+<script type="text/javascript">
+	//入口函数
+	$(function () {
+		//创建vue对象
+		var vue=new Vue({
+			el:'#content',
+			data:{
+				username:'',
+				call:'',
+				password:'',
+				phone:'',
+				email:'',
+				name:'',
+				sex:'',
+				type:'',
+				breed:'',
+				age:'',
+				status:''
+			},
+			methods:{
+				createPetOwner:function () {
+					axios({
+						url:'/settings/qx/user/register',
+						method:'post',
+						params:{
+							pUserName:this.username,
+							pCall:this.call,
+							pPassword:this.password,
+							pPhone:this.phone,
+							pEmail:this.email,
+							pName:this.name,
+							pSex:this.sex,
+							pType:this.type,
+							pBreed:this.breed,
+							pAge:this.age,
+							pStatus:this.status
+						}
+					})
+					.then(function (value) {
+						if(value.data.code=="1"){
+							alert("注册成功！");
+							window.location.href='/settings/qx/user/toLogin';
+						}else{
+							alert(value.data.message);
+						}
+					});
+				}
+			}
+		});
+
+		//给注册按钮添加单击事件
+		$("#register").click(function () {
+			//表单验证
+			if(vue.username==null || vue.username==""){
+				alert("用户名不可为空！");
+				return;
+			}
+			if(vue.password==null || vue.password==""){
+				alert("密码不可为空！");
+				return;
+			}
+			if(vue.call==null || vue.call==""){
+				alert("称呼不可为空！");
+				return;
+			}
+			if(vue.phone==null || vue.phone==""){
+				alert("联系电话不可为空！");
+				return;
+			}
+			if(vue.email==null || vue.email==""){
+				alert("邮箱不可为空！");
+				return;
+			}
+			//注册
+			vue.createPetOwner();
+		});
+	})
+</script>
+</head>
+<body>
+<div id="content">
+	<div style="position:  relative; left: 30px;">
+		<h3>用户注册</h3>
+	  	<div style="position: relative; top: -40px; left: 70%;">
+			<button id="register" type="button" class="btn btn-primary">注册</button>
+			<button type="button" class="btn btn-default">取消</button>
+		</div>
+		<hr style="position: relative; top: -40px;">
+	</div>
+	<form class="form-horizontal" role="form" style="position: relative; top: -30px;">
+		<div class="form-group">
+			<label for="create-user-name" class="col-sm-2 control-label">用户名<span style="font-size: 15px; color: red;">*</span></label>
+			<div class="col-sm-10" style="width: 300px;">
+				<input type="text" class="form-control" id="create-user-name" v-model="username">
+			</div>
+			<label for="create-call" class="col-sm-2 control-label">用户称呼</label>
+			<div class="col-sm-10" style="width: 300px;">
+				<select class="form-control" id="create-call" v-model="call">
+					<option></option>
+					<option>先生</option>
+					<option th:each="stage : ${stageList}" th:value="${stage.id}" th:text="${stage.value}">先生</option>
+					<!--			  	<option>需求分析</option>-->
+					<!--			  	<option>价值建议</option>-->
+					<!--			  	<option>确定决策者</option>-->
+					<!--			  	<option>提案/报价</option>-->
+					<!--			  	<option>谈判/复审</option>-->
+					<!--			  	<option>成交</option>-->
+					<!--			  	<option>丢失的线索</option>-->
+					<!--			  	<option>因竞争丢失关闭</option>-->
+				</select>
+			</div>
+		</div>
+		
+		<div class="form-group">
+			<label for="create-password" class="col-sm-2 control-label">密码<span style="font-size: 15px; color: red;">*</span></label>
+			<div class="col-sm-10" style="width: 300px;">
+				<input type="text" class="form-control" id="create-password" v-model="password">
+			</div>
+			<label for="create-phone" class="col-sm-2 control-label">联系电话<span style="font-size: 15px; color: red;">*</span></label>
+			<div class="col-sm-10" style="width: 300px;">
+				<input type="text" class="form-control" id="create-phone" v-model="phone">
+			</div>
+		</div>
+		
+		<div class="form-group">
+			<label for="create-email" class="col-sm-2 control-label">邮箱<span style="font-size: 15px; color: red;">*</span></label>
+			<div class="col-sm-10" style="width: 300px;">
+				<input type="text" class="form-control" id="create-email" v-model="email">
+			</div>
+			<label for="create-name" class="col-sm-2 control-label">宠物名称</label>
+			<div class="col-sm-10" style="width: 300px;">
+				<input type="text" class="form-control" id="create-name" v-model="name">
+			</div>
+		</div>
+		
+		<div class="form-group">
+			<label for="create-sex" class="col-sm-2 control-label">宠物性别</label>
+			<div class="col-sm-10" style="width: 300px;">
+				<select class="form-control" id="create-sex" v-model="sex">
+					<option></option>
+					<option th:each="stage : ${stageList}" th:value="${stage.id}" th:text="${stage.value}">公</option>
+					<!--			  	<option>需求分析</option>-->
+					<!--			  	<option>价值建议</option>-->
+					<!--			  	<option>确定决策者</option>-->
+					<!--			  	<option>提案/报价</option>-->
+					<!--			  	<option>谈判/复审</option>-->
+					<!--			  	<option>成交</option>-->
+					<!--			  	<option>丢失的线索</option>-->
+					<!--			  	<option>因竞争丢失关闭</option>-->
+				</select>
+			</div>
+			<label for="create-type" class="col-sm-2 control-label">宠物类别</label>
+			<div class="col-sm-10" style="width: 300px;">
+				<select class="form-control" id="create-type">
+					<option></option>
+					<option th:each="stage : ${stageList}" th:value="${stage.id}" th:text="${stage.value}">狗</option>
+					<!--			  	<option>需求分析</option>-->
+					<!--			  	<option>价值建议</option>-->
+					<!--			  	<option>确定决策者</option>-->
+					<!--			  	<option>提案/报价</option>-->
+					<!--			  	<option>谈判/复审</option>-->
+					<!--			  	<option>成交</option>-->
+					<!--			  	<option>丢失的线索</option>-->
+					<!--			  	<option>因竞争丢失关闭</option>-->
+				</select>
+			</div>
+		</div>
+		
+		<div class="form-group">
+			<label for="create-breed" class="col-sm-2 control-label">宠物品种</label>
+			<div class="col-sm-10" style="width: 300px;">
+				<select class="form-control" id="create-breed" v-model="breed">
+					<option></option>
+					<option th:each="type : ${tranTypeList}" th:value="${type.id}" th:text="${type.value}">哈士奇</option>
+					<!--				  <option>新业务</option>-->
+				</select>
+			</div>
+			<label for="create-age" class="col-sm-2 control-label">宠物年龄</label>
+			<div class="col-sm-10" style="width: 300px;">
+				<input type="text" class="form-control" id="create-age" v-model="age">
+			</div>
+		</div>
+		
+		<div class="form-group">
+			<label for="create-status" class="col-sm-2 control-label">宠物状态</label>
+			<div class="col-sm-10" style="width: 70%;">
+				<textarea class="form-control" rows="3" id="create-status" v-model="status"></textarea>
+			</div>
+		</div>
+	</form>
+</div>
+</body>
+</html>
