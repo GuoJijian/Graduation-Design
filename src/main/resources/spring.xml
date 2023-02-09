@@ -11,7 +11,7 @@
                             https://www.springframework.org/schema/tx/spring-tx.xsd">
 
     <!--开启组件扫描-->
-    <context:component-scan base-package="com.guojijian.pethospital.settings.service"/>
+    <context:component-scan base-package="com.guojijian.pethospital.settings.service,com.guojijian.pethospital.workbench.service"/>
 
     <!--解析jdbc配置文件-->
     <context:property-placeholder location="classpath:jdbc.properties"/>
@@ -40,6 +40,6 @@
 
     <!--注册Mapper接口扫描类-->
     <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
-        <property name="basePackage" value="com.guojijian.pethospital.settings.mapper"/>
+        <property name="basePackage" value="com.guojijian.pethospital.settings.mapper,com.guojijian.pethospital.workbench.mapper"/>
     </bean>
 </beans>

@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+
+<link th:href="@{/static/jquery/bootstrap_3.3.0/css/bootstrap.min.css}" type="text/css" rel="stylesheet" />
+<link th:href="@{/static/jquery/bootstrap-datetimepicker-master/css/bootstrap-datetimepicker.min.css}" type="text/css" rel="stylesheet" />
+
+<script type="text/javascript" th:src="@{/static/jquery/jquery-1.11.1-min.js}"></script>
+<script type="text/javascript" th:src="@{/static/jquery/bootstrap_3.3.0/js/bootstrap.min.js}"></script>
+<script type="text/javascript" th:src="@{/static/jquery/bootstrap-datetimepicker-master/js/bootstrap-datetimepicker.js}"></script>
+<script type="text/javascript" th:src="@{/static/jquery/bootstrap-datetimepicker-master/locale/bootstrap-datetimepicker.zh-CN.js}"></script>
+<script type="text/javascript" th:src="@{/static/jquery/vue.js}"></script>
+<script type="text/javascript" th:src="@{/static/jquery/axios.min.js}"></script>
+
+<script type="text/javascript">
+
+	$(function(){
+		//创建vue对象
+		var vue=new Vue({
+			el:'#content',
+			data:{
+				createTitle:'',
+				createInfotype:'',
+				createContent:'',
+
+				//搜索参数
+				title:'',
+				infotype:'',
+				startDate:'',
+				endDate:''
+			},
+			methods:{
+				createInfo:function () {
+					axios({
+						url:'/workbench/information/createInfo',
+						method:'post',
+						params:{
+							iTitle:this.createTitle,
+							iInfotype:this.createInfotype,
+							iContent:this.createContent
+						}
+					})
+					.then(function (value) {
+						if(value.data.code=="1"){
+							//更新信息列表
+							var infoHtml="";
+							infoHtml+="<tr class=\"active\">";
+							infoHtml+="<td><input type=\"checkbox\" /></td>";
+							infoHtml+="<td><a style=\"text-decoration: none; cursor: pointer;\">"+value.data.retObject.iTitle+"</a></td>";
+							infoHtml+="<td>"+value.data.retObject.eid+"</td>";
+							infoHtml+="<td>"+value.data.retObject.iTime+"</td>";
+							infoHtml+="<td>"+value.data.retObject.iInfotype+"</td>";
+							infoHtml+="</tr>";
+							$("#infoListTable").append(infoHtml);
+							//关闭模态窗口
+							$("#createInfoModal").modal("hide");
+						}else{
+							alert(value.data.message);
+						}
+					});
+				}
+			}
+		});
+		
+		//给创建按钮添加单击事件
+		$("#createInfoBtn").click(function () {
+			//清空表单
+			$("#createInfoForm").get(0).reset();
+			//显示创建信息的模态窗口
+			$("#createInfoModal").modal("show");
+		});
+
+		//给保存按钮添加单击事件
+		$("#saveInfoBtn").click(function () {
+			//表单验证
+			if(vue.createTitle==""){
+				alert("信息标题不可为空！");
+				return;
+			}
+			if(vue.createInfotype==""){
+				alert("信息类别不可为空！");
+				return;
+			}
+			if(vue.createContent==""){
+				alert("信息内容不可为空！");
+				return;
+			}
+			//异步请求创建信息
+			vue.createInfo();
+		});
+	});
+	
+</script>
+</head>
+<body>
+<div id="content">
+	<!-- 创建信息的模态窗口 -->
+	<div class="modal fade" id="createInfoModal" role="dialog">
+		<div class="modal-dialog" role="document" style="width: 85%;">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal">
+						<span aria-hidden="true">×</span>
+					</button>
+					<h4 class="modal-title" id="myModalLabel1">创建信息</h4>
+				</div>
+				<div class="modal-body">
+				
+					<form id="createInfoForm" class="form-horizontal" role="form">
+					
+						<div class="form-group">
+                            <label for="create-title" class="col-sm-2 control-label">标题<span style="font-size: 15px; color: red;">*</span></label>
+                            <div class="col-sm-10" style="width: 300px;">
+                                <input type="text" class="form-control" id="create-title" v-model="createTitle">
+                            </div>
+						</div>
+
+						<div class="form-group">
+							<label for="create-infoType" class="col-sm-2 control-label">类别<span style="font-size: 15px; color: red;">*</span></label>
+							<div class="col-sm-10" style="width: 300px;">
+								<select class="form-control" id="create-infoType" v-model="createInfotype">
+									<option>养生</option>
+									<!--									<option>lisi</option>-->
+									<!--									<option>wangwu</option>-->
+								</select>
+							</div>
+						</div>
+
+						<div class="form-group">
+							<label for="create-content" class="col-sm-2 control-label">内容<span style="font-size: 15px; color: red;">*</span></label>
+							<div class="col-sm-10" style="width: 81%;">
+								<textarea class="form-control" rows="3" id="create-content" v-model="createContent"></textarea>
+							</div>
+						</div>
+						
+					</form>
+					
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+					<button id="saveInfoBtn" type="button">保存</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<!-- 修改信息的模态窗口 -->
+	<div class="modal fade" id="editActivityModal" role="dialog">
+		<div class="modal-dialog" role="document" style="width: 85%;">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal">
+						<span aria-hidden="true">×</span>
+					</button>
+					<h4 class="modal-title" id="myModalLabel2">修改信息</h4>
+				</div>
+				<div class="modal-body">
+				
+					<form class="form-horizontal" role="form">
+					
+						<div class="form-group">
+                            <label for="edit-title" class="col-sm-2 control-label">标题<span style="font-size: 15px; color: red;">*</span></label>
+                            <div class="col-sm-10" style="width: 300px;">
+                                <input type="text" class="form-control" id="edit-title" value="发传单">
+                            </div>
+							<label for="edit-infoType" class="col-sm-2 control-label">类别<span style="font-size: 15px; color: red;">*</span></label>
+							<div class="col-sm-10" style="width: 300px;">
+								<select class="form-control" id="edit-infoType">
+									<option>zhangsan</option>
+									<option>lisi</option>
+									<option>wangwu</option>
+								</select>
+							</div>
+						</div>
+						
+						<div class="form-group">
+							<label for="edit-content" class="col-sm-2 control-label">内容</label>
+							<div class="col-sm-10" style="width: 81%;">
+								<textarea class="form-control" rows="3" id="edit-content">市场活动Marketing，是指品牌主办或参与的展览会议与公关市场活动，包括自行主办的各类研讨会、客户交流会、演示会、新产品发布会、体验会、答谢会、年会和出席参加并布展或演讲的展览会、研讨会、行业交流会、颁奖典礼等</textarea>
+							</div>
+						</div>
+						
+					</form>
+					
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+					<button type="button" class="btn btn-primary" data-dismiss="modal">更新</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<!-- 导入信息的模态窗口 -->
+    <div class="modal fade" id="importInfoModal" role="dialog">
+        <div class="modal-dialog" role="document" style="width: 85%;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                    <h4 class="modal-title" id="myModalLabel">导入信息</h4>
+                </div>
+                <div class="modal-body" style="height: 350px;">
+                    <div style="position: relative;top: 20px; left: 50px;">
+                        请选择要上传的文件：<small style="color: gray;">[仅支持.xls]</small>
+                    </div>
+                    <div style="position: relative;top: 40px; left: 50px;">
+                        <input type="file" id="activityFile">
+                    </div>
+                    <div style="position: relative; width: 400px; height: 320px; left: 45% ; top: -40px;" >
+                        <h3>重要提示</h3>
+                        <ul>
+                            <li>操作仅针对Excel，仅支持后缀名为XLS的文件。</li>
+                            <li>给定文件的第一行将视为字段名。</li>
+                            <li>请确认您的文件大小不超过5MB。</li>
+                            <li>默认情况下，字符编码是UTF-8 (统一码)，请确保您导入的文件使用的是正确的字符编码方式。</li>
+                            <li>建议您在导入真实数据之前用测试文件测试文件导入功能。</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button id="importActivityBtn" type="button" class="btn btn-primary">导入</button>
+                </div>
+            </div>
+        </div>
+    </div>
+	
+	
+	<div>
+		<div style="position: relative; left: 10px; top: -10px;">
+			<div class="page-header">
+				<h3>信息列表</h3>
+			</div>
+		</div>
+	</div>
+	<div style="position: relative; top: -20px; left: 0px; width: 100%; height: 100%;">
+		<div style="width: 100%; position: absolute;top: 5px; left: 10px;">
+		
+			<div class="btn-toolbar" role="toolbar" style="height: 80px;">
+				<form class="form-inline" role="form" style="position: relative;top: 8%; left: 5px;">
+				  
+				  <div class="form-group">
+				    <div class="input-group">
+				      <div class="input-group-addon">标题</div>
+				      <input class="form-control" type="text" v-model="title">
+				    </div>
+				  </div>
+
+				  <div class="form-group">
+					  <div class="input-group">
+						  <div class="input-group-addon">类别</div>
+						  <select class="form-control" v-model="infotype">
+							  <option></option>
+							  <option>相亲</option>
+							  <option>诊疗</option>
+						  </select>
+					  </div>
+				  </div>
+
+				  <div class="form-group">
+					  <div class="input-group">
+						  <div class="input-group-addon">开始日期</div>
+						  <input class="form-control editDate" type="text" id="start-date" v-model="startDate" readonly/>
+					  </div>
+				  </div>
+
+				  <div class="form-group">
+					  <div class="input-group">
+						  <div class="input-group-addon">结束日期</div>
+						  <input class="form-control editDate" type="text" id="end-date" v-model="endDate" readonly>
+					  </div>
+				  </div>
+				  
+				  <button type="submit" class="btn btn-default">查询</button>
+				  
+				</form>
+			</div>
+			<div class="btn-toolbar" role="toolbar" style="background-color: #F7F7F7; height: 50px; position: relative;top: 5px;">
+				<div class="btn-group" style="position: relative; top: 18%;">
+				  <button id="createInfoBtn" type="button" class="btn btn-primary"><span class="glyphicon glyphicon-plus"></span> 创建</button>
+				  <button type="button" class="btn btn-default" data-toggle="modal" data-target="#editActivityModal"><span class="glyphicon glyphicon-pencil"></span> 修改</button>
+				  <button type="button" class="btn btn-danger"><span class="glyphicon glyphicon-minus"></span> 删除</button>
+				</div>
+				<div class="btn-group" style="position: relative; top: 18%;">
+                    <button type="button" class="btn btn-default" data-toggle="modal" data-target="#importActivityModal" ><span class="glyphicon glyphicon-import"></span> 上传列表数据（导入）</button>
+                    <button id="exportActivityAllBtn" type="button" class="btn btn-default"><span class="glyphicon glyphicon-export"></span> 下载列表数据（批量导出）</button>
+                    <button id="exportActivityXzBtn" type="button" class="btn btn-default"><span class="glyphicon glyphicon-export"></span> 下载列表数据（选择导出）</button>
+                </div>
+			</div>
+			<div style="position: relative;top: 10px;">
+				<table id="infoListTable" class="table table-hover">
+					<thead>
+						<tr style="color: #B3B3B3;">
+							<td><input type="checkbox" /></td>
+							<td>标题</td>
+                            <td>发布者</td>
+							<td>发布日期</td>
+							<td>信息类别</td>
+						</tr>
+					</thead>
+					<tbody>
+						<tr class="active">
+							<td><input type="checkbox" /></td>
+							<td><a style="text-decoration: none; cursor: pointer;" onclick="window.location.href='detail.html';">发传单</a></td>
+                            <td>zhangsan</td>
+							<td>2020-10-10</td>
+							<td>2020-10-20</td>
+						</tr>
+<!--                        <tr class="active">-->
+<!--                            <td><input type="checkbox" /></td>-->
+<!--                            <td><a style="text-decoration: none; cursor: pointer;" onclick="window.location.href='detail.html';">发传单</a></td>-->
+<!--                            <td>zhangsan</td>-->
+<!--                            <td>2020-10-10</td>-->
+<!--                            <td>2020-10-20</td>-->
+<!--                        </tr>-->
+					</tbody>
+				</table>
+			</div>
+			
+			<div style="height: 50px; position: relative;top: 30px;">
+				<div>
+					<button type="button" class="btn btn-default" style="cursor: default;">共<b>50</b>条记录</button>
+				</div>
+				<div class="btn-group" style="position: relative;top: -34px; left: 110px;">
+					<button type="button" class="btn btn-default" style="cursor: default;">显示</button>
+					<div class="btn-group">
+						<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+							10
+							<span class="caret"></span>
+						</button>
+						<ul class="dropdown-menu" role="menu">
+							<li><a href="#">20</a></li>
+							<li><a href="#">30</a></li>
+						</ul>
+					</div>
+					<button type="button" class="btn btn-default" style="cursor: default;">条/页</button>
+				</div>
+				<div style="position: relative;top: -88px; left: 285px;">
+					<nav>
+						<ul class="pagination">
+							<li class="disabled"><a href="#">首页</a></li>
+							<li class="disabled"><a href="#">上一页</a></li>
+							<li class="active"><a href="#">1</a></li>
+							<li><a href="#">2</a></li>
+							<li><a href="#">3</a></li>
+							<li><a href="#">4</a></li>
+							<li><a href="#">5</a></li>
+							<li><a href="#">下一页</a></li>
+							<li class="disabled"><a href="#">末页</a></li>
+						</ul>
+					</nav>
+				</div>
+			</div>
+			
+		</div>
+		
+	</div>
+</div>
+</body>
+</html>
