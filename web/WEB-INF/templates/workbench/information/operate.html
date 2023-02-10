@@ -22,19 +22,31 @@
 			data:{
 				page:{
 					pageSize:10,
-					pageNum:1
+					pageNum:1,
+					total:0
 				},
+				infoList:{
 
-				createTitle:'',
-				createInfotype:'',
-				createContent:'',
-
+				},
 				//搜索参数
 				title:'',
 				infotype:'',
 				startDate:'',
-				endDate:''
+				endDate:'',
 
+				//创建参数
+				createTitle:'',
+				createInfotype:'',
+				createContent:'',
+
+				//修改参数
+				id:'',
+				editTitle:'',
+				editInfotype:'',
+				editContent:'',
+
+				//删除参数
+				ids:''
 			},
 			methods:{
 				createInfo:function () {
@@ -51,16 +63,116 @@
 						if(value.data.code=="1"){
 							//更新信息列表
 							var infoHtml="";
-							infoHtml+="<tr class=\"active\">";
-							infoHtml+="<td><input type=\"checkbox\" /></td>";
+							infoHtml+="<tr id=\"tr_"+value.data.retObject.iId+"\" class=\"active\">";
+							infoHtml+="<td><input type=\"checkbox\" id=\""+value.data.retObject.iId+"\"/></td>";
 							infoHtml+="<td><a style=\"text-decoration: none; cursor: pointer;\">"+value.data.retObject.iTitle+"</a></td>";
 							infoHtml+="<td>"+value.data.retObject.eid+"</td>";
 							infoHtml+="<td>"+value.data.retObject.iTime+"</td>";
-							infoHtml+="<td>"+value.data.retObject.iInfotype+"</td>";
+							infoHtml+="<td id=\"td_"+value.data.retObject.iId+"\">"+value.data.retObject.iInfotype+"</td>";
 							infoHtml+="</tr>";
 							$("#infoListTable").append(infoHtml);
+							//刷新总记录数
+							vue.page.total+=1;
 							//关闭模态窗口
 							$("#createInfoModal").modal("hide");
+						}else{
+							alert(value.data.message);
+						}
+					});
+				},
+				queryInfoForPageByCondition:function () {
+					axios({
+						url:'/workbench/information/queryInfoForPageByCondition',
+						method:'post',
+						params:{
+							iTitle:this.title,
+							iInfotype:this.infotype,
+							startDate:this.startDate,
+							endDate:this.endDate,
+							pageSize:this.page.pageSize,
+							pageNum:this.page.pageNum
+						}
+					})
+					.then(function (value) {
+						vue.page=value.data.page;
+						vue.infoList=value.data.infoList;
+
+						//刷新页码栏状态
+						alert(vue.page.hasPreviousPage);
+						if(vue.page.hasPreviousPage){
+							$("#paginationUl li[class='isPrePage disabled']").attr("class","isPrePage");
+						}else{
+							$("#paginationUl li[class='isPrePage']").attr("class","isPrePage disabled");
+						}
+						if(vue.page.hasNextPage){
+							$("#paginationUl li[class='isNextPage disabled']").attr("class","isNextPage");
+						}else{
+							$("#paginationUl li[class='isNextPage']").attr("class","isNextPage disabled");
+						}
+						$("#paginationUl li[class='pageNum active']").attr("class","pageNum");
+						$("#paginationUl li[id='li_"+vue.page.pageNum+"']").attr("class","pageNum active");
+					});
+				},
+				queryInfoById:function () {
+					axios({
+						url:'/workbench/information/queryInfoById',
+						method:'post',
+						params:{
+							iId:this.id
+						}
+					})
+					.then(function (value) {
+						vue.editTitle=value.data.iTitle;
+						vue.editInfotype=value.data.iInfotype;
+						vue.editContent=value.data.iContent;
+					});
+				},
+				alterInfo:function () {
+					axios({
+						url:'/workbench/information/alterInfo',
+						method:'post',
+						params:{
+							iId:this.id,
+							iTitle:this.editTitle,
+							iInfotype:this.editInfotype,
+							iContent:this.editContent
+						}
+					})
+					.then(function (value) {
+						if(value.data.code=="1"){
+							//刷新复选框状态
+							$("#infoTbody input[type='checkbox']:checked").attr("checked",false);
+							//刷新信息列表
+							$("#tr_"+value.data.retObject.iId+" a").text(value.data.retObject.iTitle);
+							$("#td_"+value.data.retObject.iId).text(value.data.retObject.iInfotype);
+							//关闭模态窗口
+							$("#editInfoModal").modal("hide");
+							//提示
+							alert("修改成功！");
+						}else{
+							alert(value.data.message);
+						}
+					});
+				},
+				dropInfoByIds:function () {
+					axios({
+						url:'/workbench/information/dropInfoByIds',
+						method:'post',
+						data:this.ids
+					})
+					.then(function (value) {
+						if(value.data.code=="1"){
+							var num=0;
+							//刷新信息列表
+							var checked=$("#infoTbody input[type='checkbox']:checked");
+							checked.each(function () {
+								$("#tr_"+this.value).remove();
+								num+=1;
+							});
+							//刷新总记录数
+							vue.page.total-=num;
+							//提示
+							alert("删除成功！");
 						}else{
 							alert(value.data.message);
 						}
@@ -68,11 +180,16 @@
 				}
 			}
 		});
-		
+
+		//页面加载时，刷新信息列表
+		vue.queryInfoForPageByCondition();
+
 		//给创建按钮添加单击事件
 		$("#createInfoBtn").click(function () {
 			//清空表单
-			$("#createInfoForm").get(0).reset();
+			vue.createTitle="";
+			vue.createInfotype="";
+			vue.createContent="";
 			//显示创建信息的模态窗口
 			$("#createInfoModal").modal("show");
 		});
@@ -94,6 +211,108 @@
 			}
 			//异步请求创建信息
 			vue.createInfo();
+		});
+
+		//给修改按钮添加单击事件
+		$("#editInfoBtn").click(function () {
+			//验证
+			var checked=$("#infoTbody input[type='checkbox']:checked");
+			if(checked.size()==0 || checked.size()>1){
+				alert("请选择一项信息！");
+				return;
+			}
+			//给vue赋值
+			vue.id=checked.val();
+			//初始化修改信息的模态窗口
+			vue.queryInfoById();
+			//显示修改信息的模态窗口
+			$("#editInfoModal").modal("show");
+		});
+
+		//给更新按钮添加单击事件
+		$("#updateInfoBtn").click(function () {
+			//表单验证
+			if(vue.editTitle==""){
+				alert("标题不可为空！");
+				return;
+			}
+			if(vue.editInfotype==""){
+				alert("类别不可为空！");
+				return;
+			}
+			if(vue.editContent==""){
+				alert("内容不可为空！")
+				return;
+			}
+
+			//修改信息
+			vue.alterInfo();
+		});
+
+		//给删除按钮添加单击事件
+		$("#dropInfoBtn").click(function () {
+			var checked=$("#infoTbody input[type='checkbox']:checked");
+			//验证
+			if(checked.size()==0){
+				alert("请选择至少一项信息！");
+				return;
+			}
+			if(!window.confirm("是否确定删除？")){
+				return;
+			}
+			//获取参数
+			var ids="";
+			checked.each(function () {
+				ids+='ids='+this.value+'&';
+			});
+			ids=ids.substr(0,ids.lastIndexOf("&"));
+			//为vue对象赋值
+			vue.ids=ids;
+			//批量删除
+			vue.dropInfoByIds();
+		});
+
+		//给页面大小下拉框添加单击事件
+		$("#pageSizeUl a").click(function () {
+			//获取参数
+			var pageSize=parseInt($(this).text());
+			//验证
+			if(pageSize==vue.page.pageSize){
+				return;
+			}
+			//为vue对象赋值
+			vue.page.pageSize=pageSize;
+			//刷新信息列表
+			vue.queryInfoForPageByCondition();
+		});
+
+		//给页码栏添加单击事件
+		$("#paginationUl li[class='isPrePage']").click(function () {
+			//为vue对象赋值
+			if($(this).children().text()=="首页"){
+				vue.page.pageNum=1;
+			}else{
+				vue.page.pageNum-=1;
+			}
+			//刷新信息列表
+			vue.queryInfoForPageByCondition();
+		});
+
+		$("#paginationUl").on("click","li[class='pageNum']",function () {
+			vue.page.pageNum=parseInt($(this).children().text());
+			//刷新信息列表
+			vue.queryInfoForPageByCondition();
+		});
+
+		$("#paginationUl li[class='isNextPage']").click(function () {
+			//为vue对象赋值
+			if($(this).children().text()=="尾页"){
+				vue.page.pageNum=vue.page.pages;
+			}else{
+				vue.page.pageNum+=1;
+			}
+			//刷新信息列表
+			vue.queryInfoForPageByCondition();
 		});
 	});
 	
@@ -126,7 +345,8 @@
 							<label for="create-infoType" class="col-sm-2 control-label">类别<span style="font-size: 15px; color: red;">*</span></label>
 							<div class="col-sm-10" style="width: 300px;">
 								<select class="form-control" id="create-infoType" v-model="createInfotype">
-									<option>养生</option>
+									<option></option>
+									<option th:each="infoType : ${infoTypeList}" th:text="${infoType.value}" th:value="${infoType.id}">养生</option>
 									<!--									<option>lisi</option>-->
 									<!--									<option>wangwu</option>-->
 								</select>
@@ -145,14 +365,14 @@
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-					<button id="saveInfoBtn" type="button">保存</button>
+					<button id="saveInfoBtn" type="button" class="btn btn-primary">保存</button>
 				</div>
 			</div>
 		</div>
 	</div>
 	
 	<!-- 修改信息的模态窗口 -->
-	<div class="modal fade" id="editActivityModal" role="dialog">
+	<div class="modal fade" id="editInfoModal" role="dialog">
 		<div class="modal-dialog" role="document" style="width: 85%;">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -168,14 +388,15 @@
 						<div class="form-group">
                             <label for="edit-title" class="col-sm-2 control-label">标题<span style="font-size: 15px; color: red;">*</span></label>
                             <div class="col-sm-10" style="width: 300px;">
-                                <input type="text" class="form-control" id="edit-title" value="发传单">
+                                <input type="text" class="form-control" id="edit-title" value="发传单" v-model="editTitle">
                             </div>
+						</div>
+
+						<div class="form-group">
 							<label for="edit-infoType" class="col-sm-2 control-label">类别<span style="font-size: 15px; color: red;">*</span></label>
 							<div class="col-sm-10" style="width: 300px;">
-								<select class="form-control" id="edit-infoType">
-									<option>zhangsan</option>
-									<option>lisi</option>
-									<option>wangwu</option>
+								<select class="form-control" id="edit-infoType" v-model="editInfotype">
+									<option th:each="infoType : ${infoTypeList}" th:text="${infoType.value}" th:value="${infoType.id}">养生</option>
 								</select>
 							</div>
 						</div>
@@ -183,7 +404,7 @@
 						<div class="form-group">
 							<label for="edit-content" class="col-sm-2 control-label">内容</label>
 							<div class="col-sm-10" style="width: 81%;">
-								<textarea class="form-control" rows="3" id="edit-content">市场活动Marketing，是指品牌主办或参与的展览会议与公关市场活动，包括自行主办的各类研讨会、客户交流会、演示会、新产品发布会、体验会、答谢会、年会和出席参加并布展或演讲的展览会、研讨会、行业交流会、颁奖典礼等</textarea>
+								<textarea class="form-control" rows="3" id="edit-content" v-model="editContent">市场活动Marketing，是指品牌主办或参与的展览会议与公关市场活动，包括自行主办的各类研讨会、客户交流会、演示会、新产品发布会、体验会、答谢会、年会和出席参加并布展或演讲的展览会、研讨会、行业交流会、颁奖典礼等</textarea>
 							</div>
 						</div>
 						
@@ -192,7 +413,7 @@
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-					<button type="button" class="btn btn-primary" data-dismiss="modal">更新</button>
+					<button id="updateInfoBtn" type="button" class="btn btn-primary">更新</button>
 				</div>
 			</div>
 		</div>
@@ -260,8 +481,7 @@
 						  <div class="input-group-addon">类别</div>
 						  <select class="form-control" v-model="infotype">
 							  <option></option>
-							  <option>相亲</option>
-							  <option>诊疗</option>
+							  <option th:each="infoType : ${infoTypeList}" th:text="${infoType.value}" th:value="${infoType.id}">养生</option>
 						  </select>
 					  </div>
 				  </div>
@@ -287,8 +507,8 @@
 			<div class="btn-toolbar" role="toolbar" style="background-color: #F7F7F7; height: 50px; position: relative;top: 5px;">
 				<div class="btn-group" style="position: relative; top: 18%;">
 				  <button id="createInfoBtn" type="button" class="btn btn-primary"><span class="glyphicon glyphicon-plus"></span> 创建</button>
-				  <button type="button" class="btn btn-default" data-toggle="modal" data-target="#editActivityModal"><span class="glyphicon glyphicon-pencil"></span> 修改</button>
-				  <button type="button" class="btn btn-danger"><span class="glyphicon glyphicon-minus"></span> 删除</button>
+				  <button id="editInfoBtn" type="button" class="btn btn-default"><span class="glyphicon glyphicon-pencil"></span> 修改</button>
+				  <button id="dropInfoBtn" type="button" class="btn btn-danger"><span class="glyphicon glyphicon-minus"></span> 删除</button>
 				</div>
 				<div class="btn-group" style="position: relative; top: 18%;">
                     <button type="button" class="btn btn-default" data-toggle="modal" data-target="#importActivityModal" ><span class="glyphicon glyphicon-import"></span> 上传列表数据（导入）</button>
@@ -298,7 +518,7 @@
 			</div>
 			<div style="position: relative;top: 10px;">
 				<table id="infoListTable" class="table table-hover">
-					<thead>
+					<thead id="infoAllThead">
 						<tr style="color: #B3B3B3;">
 							<td><input type="checkbox" /></td>
 							<td>标题</td>
@@ -307,13 +527,13 @@
 							<td>信息类别</td>
 						</tr>
 					</thead>
-					<tbody>
-						<tr class="active">
-							<td><input type="checkbox" /></td>
-							<td><a style="text-decoration: none; cursor: pointer;" onclick="window.location.href='detail.html';">发传单</a></td>
-                            <td>zhangsan</td>
-							<td>2020-10-10</td>
-							<td>2020-10-20</td>
+					<tbody id="infoTbody">
+						<tr :id="'tr_'+info.iId" class="active" v-for="info in infoList">
+							<td><input type="checkbox" :value="info.iId" /></td>
+							<td><a style="text-decoration: none; cursor: pointer;">{{info.iTitle}}</a></td>
+                            <td>{{info.eid}}</td>
+							<td>{{info.iTime}}</td>
+							<td :id="'td_'+info.iId">{{info.iInfotype}}</td>
 						</tr>
 <!--                        <tr class="active">-->
 <!--                            <td><input type="checkbox" /></td>-->
@@ -328,16 +548,17 @@
 			
 			<div style="height: 50px; position: relative;top: 30px;">
 				<div>
-					<button type="button" class="btn btn-default" style="cursor: default;">共<b>50</b>条记录</button>
+					<button type="button" class="btn btn-default" style="cursor: default;">共<b>{{page.total}}</b>条记录</button>
 				</div>
 				<div class="btn-group" style="position: relative;top: -34px; left: 110px;">
 					<button type="button" class="btn btn-default" style="cursor: default;">显示</button>
 					<div class="btn-group">
 						<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-							10
+							{{page.pageSize}}
 							<span class="caret"></span>
 						</button>
-						<ul class="dropdown-menu" role="menu">
+						<ul id="pageSizeUl" class="dropdown-menu" role="menu">
+							<li><a href="#">10</a></li>
 							<li><a href="#">20</a></li>
 							<li><a href="#">30</a></li>
 						</ul>
@@ -346,16 +567,16 @@
 				</div>
 				<div style="position: relative;top: -88px; left: 285px;">
 					<nav>
-						<ul class="pagination">
-							<li class="disabled"><a href="#">首页</a></li>
-							<li class="disabled"><a href="#">上一页</a></li>
-							<li class="active"><a href="#">1</a></li>
-							<li><a href="#">2</a></li>
-							<li><a href="#">3</a></li>
-							<li><a href="#">4</a></li>
-							<li><a href="#">5</a></li>
-							<li><a href="#">下一页</a></li>
-							<li class="disabled"><a href="#">末页</a></li>
+						<ul id="paginationUl" class="pagination">
+							<li class="isPrePage"><a href="#">首页</a></li>
+							<li class="isPrePage"><a href="#">上一页</a></li>
+							<li :id="'li_'+pageNum" v-for="pageNum in page.navigatepageNums" class="pageNum"><a href="#">{{pageNum}}</a></li>
+<!--							<li class="active"><a href="#">2</a></li>-->
+<!--							<li><a href="#">3</a></li>-->
+<!--							<li><a href="#">4</a></li>-->
+<!--							<li><a href="#">5</a></li>-->
+							<li class="isNextPage"><a href="#">下一页</a></li>
+							<li class="isNextPage"><a href="#">末页</a></li>
 						</ul>
 					</nav>
 				</div>

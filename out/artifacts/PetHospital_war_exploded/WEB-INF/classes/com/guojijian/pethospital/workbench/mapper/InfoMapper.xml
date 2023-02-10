@@ -76,10 +76,10 @@
 
   <!--List<Info> selectInfoForPageByCondition(Map<String,Object> map);-->
   <select id="selectInfoForPageByCondition" resultMap="BaseResultMap">
-    SELECT i.i_id, i.i_title, i.i_time, i.i_content, e.eid eid, d.value i_infotype
+    SELECT i.i_id, i.i_title, i.i_time, i.i_content, e.e_user_name eid, d.value i_infotype
     FROM tbl_information i
     JOIN tbl_employee e ON e.eid=i.eid
-    JOIN tbl_div_value d ON d.id=i.i_infotype
+    JOIN tbl_dic_value d ON d.id=i.i_infotype
     <where>
       <if test="iTitle!=null and iTitle!=''">
         i.i_title like % #{iTitle} %
@@ -95,4 +95,27 @@
       </if>
     </where>
   </select>
+
+  <!--Info selectInfoById(String id);-->
+  <select id="selectInfoById" resultMap="BaseResultMap">
+    SELECT i.i_id, i.i_title, i.i_time, i.i_content, i.eid, i_infotype
+    FROM tbl_information i
+    WHERE i.i_id=#{id}
+  </select>
+
+  <!--int updateInfo(Info info);-->
+  <update id="updateInfo">
+    UPDATE tbl_information
+    SET i_title=#{iTitle},i_content=#{iContent},i_infotype=#{iInfotype}
+    WHERE i_id=#{iId}
+  </update>
+
+  <!--int deleteInfoByIds(String[] ids);-->
+  <delete id="deleteInfoByIds">
+    DELETE FROM tbl_information
+    WHERE i_id IN
+    <foreach collection="array" item="id" open="(" close=")" separator=",">
+      #{id}
+    </foreach>
+  </delete>
 </mapper>

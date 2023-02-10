@@ -17,19 +17,19 @@
         </jdbcConnection>
 
         <!--JavaBean的生成策略-->
-        <javaModelGenerator targetPackage="com.guojijian.pethospital.workbench.pojo" targetProject=".\src\main\java">
+        <javaModelGenerator targetPackage="com.guojijian.pethospital.settings.pojo" targetProject=".\src\main\java">
             <property name="enableSubPackages" value="true"></property>
             <property name="trimStrings" value="true"></property>
         </javaModelGenerator>
 
         <!--SQL映射文件的生成策略-->
-        <sqlMapGenerator targetPackage="com.guojijian.pethospital.workbench.mapper" targetProject=".\src\main\resources">
+        <sqlMapGenerator targetPackage="com.guojijian.pethospital.settings.mapper" targetProject=".\src\main\resources">
             <property name="enableSubPackages" value="true"></property>
         </sqlMapGenerator>
 
         <!--Mapper接口的生成策略-->
         <javaClientGenerator type="XMLMAPPER"
-                             targetPackage="com.guojijian.pethospital.workbench.mapper"
+                             targetPackage="com.guojijian.pethospital.settings.mapper"
                              targetProject=".\src\main\java">
             <property name="enableSubPackages" value="true"></property>
         </javaClientGenerator>
@@ -40,7 +40,8 @@
         <!--已生成-->
 <!--        <table tableName="tbl_employee" domainObjectName="Employee"></table>-->
 <!--        <table tableName="tbl_pet_owner" domainObjectName="PetOwner"></table>-->
-        <table tableName="tbl_information" domainObjectName="Info"></table>
+<!--        <table tableName="tbl_information" domainObjectName="Info"></table>-->
+<!--        <table tableName="tbl_dic_value" domainObjectName="DicValue"></table>-->
 
         <!--未生成-->
 

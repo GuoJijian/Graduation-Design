@@ -54,4 +54,21 @@ public interface InfoMapper {
      * 根据条件模糊查询信息
      */
     List<Info> selectInfoForPageByCondition(Map<String,Object> map);
+
+    /**
+     * 根据id查询信息
+     */
+    Info selectInfoById(String id);
+
+    /**
+     * 修改信息
+     */
+    int updateInfo(Info info);
+
+    /**
+     * 根据id批量删除信息
+     * @param ids
+     * @return
+     */
+    int deleteInfoByIds(String[] ids);
 }

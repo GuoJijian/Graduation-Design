@@ -24,4 +24,19 @@ public class InfoServiceImpl implements InfoService {
     public List<Info> queryInfoForPageByCondition(Map<String, Object> map) {
         return infoMapper.selectInfoForPageByCondition(map);
     }
+
+    @Override
+    public Info queryInfoById(String id) {
+        return infoMapper.selectInfoById(id);
+    }
+
+    @Override
+    public int alterInfo(Info info) {
+        return infoMapper.updateInfo(info);
+    }
+
+    @Override
+    public int dropInfoByIds(String[] ids) {
+        return infoMapper.deleteInfoByIds(ids);
+    }
 }

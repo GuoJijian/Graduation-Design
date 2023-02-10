@@ -15,4 +15,19 @@ public interface InfoService {
      * 根据条件分页查询信息
      */
     List<Info> queryInfoForPageByCondition(Map<String,Object> map);
+
+    /**
+     * 根据id查询信息
+     */
+    Info queryInfoById(String id);
+
+    /**
+     * 修改信息
+     */
+    int alterInfo(Info info);
+
+    /**
+     * 根据ids批量删除信息
+     */
+    int dropInfoByIds(String[] ids);
 }
