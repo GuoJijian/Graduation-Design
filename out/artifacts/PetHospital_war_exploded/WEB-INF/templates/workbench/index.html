@@ -120,7 +120,7 @@
 			<ul>
 				<li class="dropdown user-dropdown">
 					<a href="javascript:void(0)" style="text-decoration: none; color: white;" class="dropdown-toggle" data-toggle="dropdown">
-						<span class="glyphicon glyphicon-user"></span> <span  th:text="${session.user.eName!=null ? session.user.eUserName : session.user.pUserName}">zhangsan</span> <span class="caret"></span>
+						<span class="glyphicon glyphicon-user"></span> <span  th:text="${session.user.grade>'1' ? session.user.eUserName : session.user.pUserName}">zhangsan</span> <span class="caret"></span>
 					</a>
 					<ul class="dropdown-menu">
 						<li><a th:href="@{/settings/qx/user/toDetail}"> <span class="glyphicon glyphicon-file"></span> 我的资料</a></li>
@@ -139,7 +139,7 @@
 		<div id="navigation" style="left: 0px; width: 18%; position: relative; height: 100%; overflow:auto;">
 		
 			<ul id="no1" class="nav nav-pills nav-stacked">
-				<li class="liClass"><a th:href="@{/workbench/infomation/toIndex}" target="workareaFrame"><span class="glyphicon glyphicon-home"></span> 信息浏览</a></li>
+				<li class="liClass"><a th:href="@{/workbench/information/toIndex}" target="workareaFrame"><span class="glyphicon glyphicon-home"></span> 信息浏览</a></li>
 				<li class="liClass"><a th:href="@{/workbench/appointment/toIndex}" target="workareaFrame"><span class="glyphicon glyphicon-tag"></span> 预约</a></li>
 				<li class="liClass"><a href="javascript:void(0);" target="workareaFrame"><span class="glyphicon glyphicon-time"></span> 宠物挂号</a></li>
 				<li class="liClass"><a href="javascript:void(0);" target="workareaFrame"><span class="glyphicon glyphicon-user"></span> 宠物寄养</a></li>

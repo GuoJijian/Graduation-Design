@@ -69,6 +69,7 @@ public class UserController {
             //判断查询结果类型并转换
             if(obj instanceof PetOwner){
                 petOwner=(PetOwner)obj;
+                ro.setCode(Contants.RETURN_OBJECT_CODE_SUCCESS);
                 session.setAttribute(Contants.SESSION_USER,petOwner);
             }else{
                 Employee e=(Employee) obj;
@@ -124,7 +125,7 @@ public class UserController {
     public Object register(PetOwner petOwner){
         ReturnObject ro=new ReturnObject();
         //封装参数
-        petOwner.setPid(UUIDUtils.getUUID());
+        petOwner.setPid("0-"+UUIDUtils.getUUID());
         petOwner.setGrade(Contants.GRADE_LEVEL_ONE);
         //判断用户是否存在
         Object obj=userService.queryLoginInfoByActAndPwd(petOwner);

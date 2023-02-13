@@ -16,4 +16,9 @@ public class PetOwnerServiceImpl implements PetOwnerService {
     public int createPetOwner(PetOwner petOwner) {
         return petOwnerMapper.insertPetOwner(petOwner);
     }
+
+    @Override
+    public PetOwner queryPetOwnerById(String id) {
+        return petOwnerMapper.selectByPrimaryKey(id);
+    }
 }

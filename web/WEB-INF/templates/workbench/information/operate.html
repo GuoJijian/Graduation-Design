@@ -98,7 +98,6 @@
 						vue.infoList=value.data.infoList;
 
 						//刷新页码栏状态
-						alert(vue.page.hasPreviousPage);
 						if(vue.page.hasPreviousPage){
 							$("#paginationUl li[class='isPrePage disabled']").attr("class","isPrePage");
 						}else{
@@ -313,6 +312,12 @@
 			}
 			//刷新信息列表
 			vue.queryInfoForPageByCondition();
+		});
+
+		//给信息内容超链接添加单击事件
+		$("#infoTbody").on("click","a",function () {
+			var id=$(this).attr("value");
+			window.location.href='/workbench/information/toDetail?id='+id;
 		});
 	});
 	
@@ -530,7 +535,7 @@
 					<tbody id="infoTbody">
 						<tr :id="'tr_'+info.iId" class="active" v-for="info in infoList">
 							<td><input type="checkbox" :value="info.iId" /></td>
-							<td><a style="text-decoration: none; cursor: pointer;">{{info.iTitle}}</a></td>
+							<td><a style="text-decoration: none; cursor: pointer;" :value="info.iId">{{info.iTitle}}</a></td>
                             <td>{{info.eid}}</td>
 							<td>{{info.iTime}}</td>
 							<td :id="'td_'+info.iId">{{info.iInfotype}}</td>

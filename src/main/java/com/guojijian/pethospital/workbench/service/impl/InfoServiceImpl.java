@@ -39,4 +39,9 @@ public class InfoServiceImpl implements InfoService {
     public int dropInfoByIds(String[] ids) {
         return infoMapper.deleteInfoByIds(ids);
     }
+
+    @Override
+    public Info queryInfoForDetailById(String id) {
+        return infoMapper.selectInfoForDetailById(id);
+    }
 }

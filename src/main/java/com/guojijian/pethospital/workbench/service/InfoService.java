@@ -30,4 +30,9 @@ public interface InfoService {
      * 根据ids批量删除信息
      */
     int dropInfoByIds(String[] ids);
+
+    /**
+     * 根据id查询详细信息
+     */
+    Info queryInfoForDetailById(String id);
 }

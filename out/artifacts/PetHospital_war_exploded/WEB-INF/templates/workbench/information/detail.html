@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+
+<link th:href="@{/static/jquery/bootstrap_3.3.0/css/bootstrap.min.css}" type="text/css" rel="stylesheet" />
+<script type="text/javascript" th:src="@{/static/jquery/jquery-1.11.1-min.js}"></script>
+<script type="text/javascript" th:src="@{/static/jquery/bootstrap_3.3.0/js/bootstrap.min.js}"></script>
+<script type="text/javascript" th:src="@{/static/jquery/vue.js}"></script>
+<script type="text/javascript" th:src="@{/static/jquery/axios.min.js}"></script>
+
+<script type="text/javascript">
+
+	//默认情况下取消和保存按钮是隐藏的
+	var cancelAndSaveBtnDefault = true;
+	
+	$(function(){
+		//创建vue对象
+		var vue=new Vue({
+			el:'#content',
+			data:{
+				//信息参数
+				id:'',
+				title:'',
+				grade:'',
+
+				//创建评论参数
+				noteContent:'',
+
+				//查询评论参数
+				infoCommentList:{
+
+				},
+
+				//删除评论参数
+				commentId:''
+			},
+			methods:{
+				createInfoComment:function () {
+					axios({
+						url:'/workbench/information/createInfoComment',
+						method:'post',
+						params:{
+							infoId:this.id,
+							noteContent:this.noteContent
+						}
+					})
+					.then(function (value) {
+						if(value.data.code=="1"){
+							//清空评论输入框
+							vue.noteContent="";
+							//刷新评论
+							var commentHtml="";
+							commentHtml+="<div id=\"div_"+value.data.retObject.id+"\" class=\"remarkDiv\" style=\"height: 60px;\">";
+							commentHtml+="<img title=\"zhangsan\" src=\"../../image/user-thumbnail.png\" style=\"width: 30px; height:30px;\">";
+							commentHtml+="<div style=\"position: relative; top: -40px; left: 40px;\" >";
+							commentHtml+="<h5>"+value.data.retObject.noteContent+"</h5>";
+							commentHtml+="<font color=\"gray\">信息</font> <font color=\"gray\">-</font> <b>"+vue.title+"</b> <small style=\"color: gray;\"> "+value.data.retObject.createDate+" 由"+value.data.retObject.createBy+"创建</small>";
+							commentHtml+="<div id=\"deleteDiv\" style=\"position: relative; left: 500px; top: -30px; height: 30px; width: 100px; display: none;\">";
+							commentHtml+="<a class=\"myHref\" href=\"javascript:void(0);\" commentId=\""+value.data.retObject.id+"\"><span class=\"glyphicon glyphicon-remove\" style=\"font-size: 20px; color: #E6E6E6;\"\"></span></a>";
+							commentHtml+="</div>";
+							commentHtml+="</div>";
+							commentHtml+="</div>";
+							$("#commentDiv").before(commentHtml);
+						}else{
+							alert(value.data.message);
+						}
+					});
+				},
+				queryInfoCommentByInfoId:function () {
+					axios({
+						url:'/workbench/information/queryInfoCommentByInfoId',
+						method:'post',
+						params:{
+							id:this.id
+						}
+					})
+					.then(function (value) {
+						//刷新评论列表
+						vue.infoCommentList=value.data;
+					});
+				},
+				dropInfoCommentById:function () {
+					axios({
+						url:'/workbench/information/dropInfoCommentById',
+						method:'post',
+						params:{
+							commentId:this.commentId
+						}
+					})
+					.then(function (value) {
+						if(value.data.code=="1"){
+							//刷新评论列表
+							$("#div_"+vue.commentId).remove();
+							//提示
+							alert("评论删除成功！");
+						}else{
+							alert(value.data.message);
+						}
+					});
+				}
+			}
+		});
+
+		//为vue对象赋值
+		vue.id=$("#content").attr("infoId");
+		vue.title=$("#content").attr("infoTitle");
+		vue.grade=$("#content").attr("grade");
+		//刷新评论列表
+		vue.queryInfoCommentByInfoId();
+
+		$("#comment").focus(function(){
+			if(cancelAndSaveBtnDefault){
+				//设置commentDiv的高度为130px
+				$("#commentDiv").css("height","130px");
+				//显示
+				$("#cancelAndSaveBtn").show("2000");
+				cancelAndSaveBtnDefault = false;
+			}
+		});
+		
+		$("#cancelBtn").click(function(){
+			//显示
+			$("#cancelAndSaveBtn").hide();
+			//设置remarkDiv的高度为130px
+			$("#commentDiv").css("height","90px");
+			cancelAndSaveBtnDefault = true;
+		});
+
+		//权限验证
+		if("1"<vue.grade){
+			$("#commentListDiv").on("mouseover",".remarkDiv",function(){
+				$(this).children("div").children("div").show();
+			});
+
+			$("#commentListDiv").on("mouseout",".remarkDiv",function(){
+				$(this).children("div").children("div").hide();
+			});
+
+			$("#commentListDiv").on("mouseover",".myHref",function(){
+				$(this).children("span").css("color","red");
+			});
+
+			$("#commentListDiv").on("mouseout",".myHref",function(){
+				$(this).children("span").css("color","#E6E6E6");
+			});
+		}
+
+		//给保存评论按钮添加单击事件
+		$("#saveInfoCommentBtn").click(function () {
+			//表单验证
+			if(vue.noteContent==''){
+				alert("评论内容不可为空！");
+				return;
+			}
+			//创建评论
+			vue.createInfoComment();
+		});
+
+		//给删除超链接添加单击事件
+		$("#commentListDiv").on("click",".myHref",function () {
+			//获取参数
+			var commentId=$(this).attr("commentId");
+			alert(commentId);
+			//为vue对象赋值
+			vue.commentId=commentId;
+			//调用vue方法，删除评论
+			vue.dropInfoCommentById();
+		});
+	});
+	
+</script>
+
+</head>
+<body>
+<div id="content" th:infoId="${info.iId}" th:infoTitle="${info.iTitle}" th:grade="${user.grade}">
+	<!-- 返回按钮 -->
+	<div style="position: relative; top: 35px; left: 10px;">
+		<a href="javascript:void(0);" onclick="window.history.back();"><span class="glyphicon glyphicon-arrow-left" style="font-size: 20px; color: #DDDDDD"></span></a>
+	</div>
+	
+	<!-- 大标题 -->
+	<div style="position: relative; left: 40px; top: -30px;">
+		<div class="page-header">
+			<h3 th:text="${info.iTitle}">市场活动-发传单</h3>
+		</div>
+		
+	</div>
+	
+	<br/>
+	<br/>
+	<br/>
+
+	<!-- 详细信息 -->
+	<div style="position: relative; top: -70px;">
+		<div style="position: relative; left: 40px; height: 30px;">
+			<div style="width: 300px; color: gray;">标题</div>
+			<div style="width: 300px;position: relative; left: 200px; top: -20px;"><b th:text="${info.iTitle}">zhangsan</b></div>
+			<div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -20px;"></div>
+		</div>
+		<div style="position: relative; left: 40px; height: 30px; top: 30px;">
+			<div style="width: 300px; color: gray;">发布者</div>
+			<div style="width: 500px;position: relative; left: 200px; top: -20px;"><b th:text="${info.eid}">zhangsan&nbsp;&nbsp;</b><small style="font-size: 10px; color: gray;" th:text="${info.iTime}">2017-01-18 10:10:10</small></div>
+			<div style="height: 1px; width: 550px; background: #D5D5D5; position: relative; top: -20px;"></div>
+		</div>
+		<div style="position: relative; left: 40px; height: 30px; top: 50px;">
+			<div style="width: 300px; color: gray;">内容</div>
+			<div style="width: 630px;position: relative; left: 200px; top: -20px;">
+				<b th:text="${info.iContent}">
+					市场活动Marketing，是指品牌主办或参与的展览会议与公关市场活动，包括自行主办的各类研讨会、客户交流会、演示会、新产品发布会、体验会、答谢会、年会和出席参加并布展或演讲的展览会、研讨会、行业交流会、颁奖典礼等
+				</b>
+			</div>
+			<div style="height: 1px; width: 850px; background: #D5D5D5; position: relative; top: -20px;"></div>
+		</div>
+	</div>
+	
+	<!-- 评论 -->
+	<div id="commentListDiv" style="position: relative; top: 30px; left: 40px;">
+		<div class="page-header">
+			<h4>评论</h4>
+		</div>
+		
+		<!-- 评论1 -->
+		<div :id="'div_'+infoComment.id" class="remarkDiv" style="height: 60px;" v-for="infoComment in infoCommentList">
+			<img :title="infoComment.createBy" src="../../image/user-thumbnail.png" style="width: 30px; height:30px;">
+			<div style="position: relative; top: -40px; left: 40px;" >
+				<h5>{{infoComment.noteContent}}</h5>
+				<font color="gray">信息</font> <font color="gray">-</font> <b>{{title}}</b> <small style="color: gray;"> {{infoComment.createDate}} 由{{infoComment.createBy}}创建</small>
+				<div style="position: relative; left: 500px; top: -30px; height: 30px; width: 100px; display: none;">
+					<a class="myHref" href="javascript:void(0);" :commentId="infoComment.id"><span class="glyphicon glyphicon-remove" style="font-size: 20px; color: #E6E6E6;"></span></a>
+				</div>
+			</div>
+		</div>
+		
+		<!-- 评论2 -->
+<!--		<div class="remarkDiv" style="height: 60px;">-->
+<!--			<img title="zhangsan" src="../../image/user-thumbnail.png" style="width: 30px; height:30px;">-->
+<!--			<div style="position: relative; top: -40px; left: 40px;" >-->
+<!--				<h5>呵呵！</h5>-->
+<!--				<font color="gray">市场活动</font> <font color="gray">-</font> <b>发传单</b> <small style="color: gray;"> 2017-01-22 10:20:10 由zhangsan</small>-->
+<!--				<div style="position: relative; left: 500px; top: -30px; height: 30px; width: 100px; display: none;">-->
+<!--					<a class="myHref" href="javascript:void(0);"><span class="glyphicon glyphicon-edit" style="font-size: 20px; color: #E6E6E6;"></span></a>-->
+<!--					&nbsp;&nbsp;&nbsp;&nbsp;-->
+<!--					<a class="myHref" href="javascript:void(0);"><span class="glyphicon glyphicon-remove" style="font-size: 20px; color: #E6E6E6;"></span></a>-->
+<!--				</div>-->
+<!--			</div>-->
+<!--		</div>-->
+		
+		<div id="commentDiv" style="background-color: #E6E6E6; width: 870px; height: 90px;">
+			<form role="form" style="position: relative;top: 10px; left: 10px;">
+				<textarea id="comment" class="form-control" style="width: 850px; resize : none;" rows="2"  placeholder="添加评论..." v-model="noteContent"></textarea>
+				<p id="cancelAndSaveBtn" style="position: relative;left: 737px; top: 10px; display: none;">
+					<button id="cancelBtn" type="button" class="btn btn-default">取消</button>
+					<button id="saveInfoCommentBtn" type="button" class="btn btn-primary">保存</button>
+				</p>
+			</form>
+		</div>
+	</div>
+	<div style="height: 200px;"></div>
+</div>
+</body>
+</html>

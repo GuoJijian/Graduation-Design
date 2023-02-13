@@ -11,18 +11,139 @@
 <script type="text/javascript" th:src="@{/static/jquery/bootstrap_3.3.0/js/bootstrap.min.js}"></script>
 <script type="text/javascript" th:src="@{/static/jquery/bootstrap-datetimepicker-master/js/bootstrap-datetimepicker.js}"></script>
 <script type="text/javascript" th:src="@{/static/jquery/bootstrap-datetimepicker-master/locale/bootstrap-datetimepicker.zh-CN.js}"></script>
+<script type="text/javascript" th:src="@{/static/jquery/vue.js}"></script>
+<script type="text/javascript" th:src="@{/static/jquery/axios.min.js}"></script>
 
 <script type="text/javascript">
-
 	$(function(){
-		
-		
-		
+		//创建vue对象
+		var vue=new Vue({
+			el:'#content',
+			data:{
+				infoList:[],
+				page:{
+					pageSize:10,
+					pageNum:1,
+					total:0
+				},
+
+				//查询参数
+				title:'',
+				infotype:'',
+				startDate:'',
+				endDate:'',
+			},
+			methods:{
+				queryInfoForPageByCondition() {
+					axios({
+						url:'/workbench/information/queryInfoForPageByCondition',
+						method:'post',
+						params:{
+							iTitle:this.title,
+							iInfotype:this.infotype,
+							startDate:this.startDate,
+							endDate:this.endDate,
+							pageSize:this.page.pageSize,
+							pageNum:this.page.pageNum
+						}
+					})
+					.then(function (value) {
+						vue.page=value.data.page;
+						vue.infoList=value.data.infoList;
+
+						//刷新页码栏状态
+						if(vue.page.hasPreviousPage){
+							$("#paginationUl li[class='isPrePage disabled']").attr("class","isPrePage");
+						}else{
+							$("#paginationUl li[class='isPrePage']").attr("class","isPrePage disabled");
+						}
+						if(vue.page.hasNextPage){
+							$("#paginationUl li[class='isNextPage disabled']").attr("class","isNextPage");
+						}else{
+							$("#paginationUl li[class='isNextPage']").attr("class","isNextPage disabled");
+						}
+						$("#paginationUl li[class='pageNum active']").attr("class","pageNum");
+						$("#paginationUl li[id='li_"+vue.page.pageNum+"']").attr("class","pageNum active");
+					})
+					.catch(function (reason) {
+						reason.message;
+					});
+				}
+			}
+		});
+
+		//初始化信息列表
+		vue.queryInfoForPageByCondition();
+
+		//查询按钮添加单击事件
+		$("#searchInfoBtn").click(function () {
+			//刷新信息列表
+			vue.queryInfoForPageByCondition();
+		});
+
+		//分页相关操作
+		//给页面大小下拉框添加单击事件
+		$("#pageSizeUl a").click(function () {
+			//获取参数
+			var pageSize=parseInt($(this).text());
+			//验证
+			if(pageSize==vue.page.pageSize){
+				return;
+			}
+			//为vue对象赋值
+			vue.page.pageSize=pageSize;
+			//刷新信息列表
+			vue.queryInfoForPageByCondition();
+		});
+
+		//给页码栏添加单击事件
+		$("#paginationUl li[class='isPrePage']").click(function () {
+			//为vue对象赋值
+			if($(this).children().text()=="首页"){
+				vue.page.pageNum=1;
+			}else{
+				vue.page.pageNum-=1;
+			}
+			//刷新信息列表
+			vue.queryInfoForPageByCondition();
+		});
+
+		$("#paginationUl").on("click","li[class='pageNum']",function () {
+			vue.page.pageNum=parseInt($(this).children().text());
+			//刷新信息列表
+			vue.queryInfoForPageByCondition();
+		});
+
+		$("#paginationUl li[class='isNextPage']").click(function () {
+			//为vue对象赋值
+			if($(this).children().text()=="尾页"){
+				vue.page.pageNum=vue.page.pages;
+			}else{
+				vue.page.pageNum+=1;
+			}
+			//刷新信息列表
+			vue.queryInfoForPageByCondition();
+		});
+
+		//给信息内容超链接添加单击事件
+		$("#infoTbody").on("click","a",function () {
+			var id=$(this).attr("value");
+			window.location.href='/workbench/information/toDetail?id='+id;
+		});
+
+		//给信息列表中的标题超链接添加单击事件
+		$("#infoList").on("click","a",function () {
+			//收集参数
+			var id=$(this).attr("infoId");
+			//跳转页面
+			window.location.href='/workbench/information/toDetail?id='+id;
+		});
 	});
 	
 </script>
 </head>
 <body>
+<div id="content">
 	<div>
 		<div style="position: relative; left: 10px; top: -10px;">
 			<div class="page-header">
@@ -38,15 +159,18 @@
 				  
 				  <div class="form-group">
 				    <div class="input-group">
-				      <div class="input-group-addon">名称</div>
-				      <input class="form-control" type="text">
+				      <div class="input-group-addon">标题</div>
+				      <input class="form-control" type="text" v-model="title">
 				    </div>
 				  </div>
 				  
 				  <div class="form-group">
 				    <div class="input-group">
-				      <div class="input-group-addon">所有者</div>
-				      <input class="form-control" type="text">
+						<div class="input-group-addon">类别</div>
+						<select class="form-control" v-model="infotype">
+							<option></option>
+							<option th:each="infoType : ${infoTypeList}" th:text="${infoType.value}" th:value="${infoType.id}">养生</option>
+						</select>
 				    </div>
 				  </div>
 
@@ -54,55 +178,31 @@
 				  <div class="form-group">
 				    <div class="input-group">
 				      <div class="input-group-addon">开始日期</div>
-					  <input class="form-control" type="text" id="startTime" />
+					  <input class="form-control" type="text" id="startTime" v-model="startDate"/>
 				    </div>
 				  </div>
 				  <div class="form-group">
 				    <div class="input-group">
 				      <div class="input-group-addon">结束日期</div>
-					  <input class="form-control" type="text" id="endTime">
+					  <input class="form-control" type="text" id="endTime" v-model="endDate">
 				    </div>
 				  </div>
 				  
-				  <button type="submit" class="btn btn-default">查询</button>
+				  <button id="searchInfoBtn" type="submit" class="btn btn-default">查询</button>
 				  
 				</form>
 			</div>
 			<div style="position: relative;top: 10px;width:800px">
 				<table class="table table-hover">
-					<ul class="info-list">
-						<li>
-							<h2><a>第一个信息的标题</a></h2>
+					<ul id="infoList" class="info-list">
+						<li v-for="info in infoList">
+							<h2><a :infoId="info.iId">{{info.iTitle}}</a></h2>
 							<div class="info-content">
-								第一个信息的内容
-								第一个信息的内容第一个信息的内容
-								第一个信息的内容
-								第一个信息的内容
-								第一个信息的内容
-								第一个信息的内容
-								第一个信息的内容
-								第一个信息的内容
-								第一个信息的内容
-								第一个信息的内容第一个信息的内容
-								第一个信息的内容
-								第一个信息的内容
-								第一个信息的内容
-								第一个信息的内容
-								第一个信息的内容
-								第一个信息的内容
+								{{info.iContent}}
 							</div>
 							<div class="info-AD">
-								<span class="info-author">作者名</span>
-								<span class="info-date">/&nbsp;&nbsp;发布时间</span>
-							</div>
-						</li>
-
-						<li>
-							<h2><a>第二个信息的标题</a></h2>
-							<div class="info-content">第二个信息的内容</div>
-							<div class="info-AD">
-								<div class="info-author">作者名</div>
-								<div class="info-date">发布时间</div>
+								<span class="info-author">{{info.eid}}</span>
+								<span class="info-date">/&nbsp;&nbsp;{{info.iTime}}</span>
 							</div>
 						</li>
 					</ul>
@@ -112,16 +212,17 @@
 			
 			<div style="height: 50px; position: relative;top: 30px;">
 				<div>
-					<button type="button" class="btn btn-default" style="cursor: default;">共<b>50</b>条记录</button>
+					<button type="button" class="btn btn-default" style="cursor: default;">共<b>{{page.total}}</b>条记录</button>
 				</div>
 				<div class="btn-group" style="position: relative;top: -34px; left: 110px;">
 					<button type="button" class="btn btn-default" style="cursor: default;">显示</button>
 					<div class="btn-group">
 						<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-							10
+							{{page.pageSize}}
 							<span class="caret"></span>
 						</button>
-						<ul class="dropdown-menu" role="menu">
+						<ul id="pageSizeUl" class="dropdown-menu" role="menu">
+							<li><a href="#">10</a></li>
 							<li><a href="#">20</a></li>
 							<li><a href="#">30</a></li>
 						</ul>
@@ -130,16 +231,16 @@
 				</div>
 				<div style="position: relative;top: -88px; left: 285px;">
 					<nav>
-						<ul class="pagination">
-							<li class="disabled"><a href="#">首页</a></li>
-							<li class="disabled"><a href="#">上一页</a></li>
-							<li class="active"><a href="#">1</a></li>
-							<li><a href="#">2</a></li>
-							<li><a href="#">3</a></li>
-							<li><a href="#">4</a></li>
-							<li><a href="#">5</a></li>
-							<li><a href="#">下一页</a></li>
-							<li class="disabled"><a href="#">末页</a></li>
+						<ul id="paginationUl" class="pagination">
+							<li class="isPrePage"><a href="#">首页</a></li>
+							<li class="isPrePage"><a href="#">上一页</a></li>
+							<li :id="'li_'+pageNum" v-for="pageNum in page.navigatepageNums" class="pageNum"><a href="#">{{pageNum}}</a></li>
+							<!--							<li class="active"><a href="#">2</a></li>-->
+							<!--							<li><a href="#">3</a></li>-->
+							<!--							<li><a href="#">4</a></li>-->
+							<!--							<li><a href="#">5</a></li>-->
+							<li class="isNextPage"><a href="#">下一页</a></li>
+							<li class="isNextPage"><a href="#">末页</a></li>
 						</ul>
 					</nav>
 				</div>
@@ -148,5 +249,6 @@
 		</div>
 		
 	</div>
+</div>
 </body>
 </html>

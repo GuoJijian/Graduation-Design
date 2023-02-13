@@ -71,4 +71,9 @@ public interface InfoMapper {
      * @return
      */
     int deleteInfoByIds(String[] ids);
+
+    /**
+     * 根据id查询详细信息
+     */
+    Info selectInfoForDetailById(String id);
 }
