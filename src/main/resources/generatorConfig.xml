@@ -43,6 +43,7 @@
 <!--        <table tableName="tbl_information" domainObjectName="Info"></table>-->
 <!--        <table tableName="tbl_dic_value" domainObjectName="DicValue"></table>-->
 <!--        <table tableName="tbl_info_comment" domainObjectName="InfoComment"></table>-->
+<!--        <table tableName="tbl_appointment" domainObjectName="Appointment"></table>-->
 
         <!--未生成-->
 

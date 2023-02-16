@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+
+<link th:href="@{/static/jquery/bootstrap_3.3.0/css/bootstrap.min.css}" type="text/css" rel="stylesheet" />
+<script type="text/javascript" th:src="@{/static/jquery/jquery-1.11.1-min.js}"></script>
+<script type="text/javascript" th:src="@{/static/jquery/bootstrap_3.3.0/js/bootstrap.min.js}"></script>
+<script type="text/javascript" th:src="@{/static/jquery/vue.js}"></script>
+<script type="text/javascript" th:src="@{/static/jquery/axios.min.js}"></script>
+
+<script type="text/javascript">
+	$(function(){
+
+	});
+	
+</script>
+
+</head>
+<body>
+	<!-- 返回按钮 -->
+	<div style="position: relative; top: 35px; left: 10px;">
+		<a href="javascript:void(0);" onclick="window.history.back();"><span class="glyphicon glyphicon-arrow-left" style="font-size: 20px; color: #DDDDDD"></span></a>
+	</div>
+	
+	<!-- 大标题 -->
+	<div style="position: relative; left: 40px; top: -30px;">
+		<div class="page-header">
+			<h3><span th:text="${employee.eName}">李四先生</span> <small th:text="${employee.ePosition}">动力节点</small></h3>
+		</div>
+	</div>
+	
+	<br/>
+	<br/>
+	<br/>
+
+	<!-- 详细信息 -->
+	<div style="position: relative; top: -70px;">
+		<div style="position: relative; left: 40px; height: 30px;">
+			<div style="width: 300px; color: gray;">名称</div>
+			<div style="width: 300px;position: relative; left: 200px; top: -20px;"><b th:text="${employee.eName}">李四先生</b></div>
+			<div style="width: 300px;position: relative; left: 450px; top: -40px; color: gray;">性别</div>
+			<div style="width: 300px;position: relative; left: 650px; top: -60px;"><b th:text="${employee.eGender}">zhangsan</b></div>
+			<div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -60px;"></div>
+			<div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -60px; left: 450px;"></div>
+		</div>
+		<div style="position: relative; left: 40px; height: 30px; top: 10px;">
+			<div style="width: 300px; color: gray;">年龄</div>
+			<div style="width: 300px;position: relative; left: 200px; top: -20px;"><b th:text="${employee.eAge}">动力节点</b></div>
+			<div style="width: 300px;position: relative; left: 450px; top: -40px; color: gray;">职称</div>
+			<div style="width: 300px;position: relative; left: 650px; top: -60px;"><b th:text="${employee.ePosition}">CTO</b></div>
+			<div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -60px;"></div>
+			<div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -60px; left: 450px;"></div>
+		</div>
+		<div style="position: relative; left: 40px; height: 30px; top: 20px;">
+			<div style="width: 300px; color: gray;">邮箱</div>
+			<div style="width: 300px;position: relative; left: 200px; top: -20px;"><b th:text="${employee.eEmail}">lisi@bjpowernode.com</b></div>
+			<div style="width: 300px;position: relative; left: 450px; top: -40px; color: gray;">联系电话</div>
+			<div style="width: 300px;position: relative; left: 650px; top: -60px;"><b th:text="${employee.ePhone}">010-84846003</b></div>
+			<div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -60px;"></div>
+			<div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -60px; left: 450px;"></div>
+		</div>
+		<div style="position: relative; left: 40px; height: 30px; top: 60px;">
+			<div style="width: 300px; color: gray;">排班</div>
+			<div style="width: 500px;position: relative; left: 200px; top: -20px;"><b th:text="${employee.odType}">zhangsan</b>&nbsp;&nbsp;</div>
+			<div style="height: 1px; width: 550px; background: #D5D5D5; position: relative; top: -20px;"></div>
+		</div>
+
+	<div style="height: 200px;"></div>
+</body>
+</html>

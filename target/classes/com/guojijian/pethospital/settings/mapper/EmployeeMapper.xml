@@ -21,6 +21,7 @@
     <result column="e_department" jdbcType="CHAR" property="eDepartment" />
     <result column="e_phone" jdbcType="CHAR" property="ePhone" />
     <result column="grade" jdbcType="CHAR" property="grade" />
+    <result column="od_type" jdbcType="CHAR" property="odType" />
   </resultMap>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
     <!--
@@ -77,7 +78,7 @@
       This element was generated on Fri Feb 03 21:07:12 CST 2023.
     -->
     select eid, e_user_name, e_password, e_allow_ips, e_email, e_expire_time, e_lock_state, 
-    e_name, e_gender, e_age, e_position, e_department, e_phone, grade
+    e_name, e_gender, e_age, e_position, e_department, e_phone, grade, od_type
     from tbl_employee
     where eid = #{eid,jdbcType=CHAR}
   </select>
@@ -98,5 +99,68 @@
     e_name, e_gender, e_age, e_position, e_department, e_phone, grade
     FROM tbl_employee
     WHERE e_user_name=#{eUserName} AND e_password=#{ePassword}
+  </select>
+
+  <!--List<Employee> selectEmployeeForPageByCondition(Map<String ,Object> map);-->
+  <select id="selectEmployeeForPageByCondition" resultMap="BaseResultMap">
+    SELECT e.eid, e.e_user_name, e.e_password, e.e_allow_ips, e.e_email, e.e_expire_time, e.e_lock_state,
+    e.e_name, e.e_gender, e.e_age,d1.value e_position,d2.value e_department, e.e_phone, e.grade,d3.value od_type
+    FROM tbl_employee e
+    JOIN tbl_dic_value d1 ON e.e_position=d1.id
+    LEFT JOIN tbl_dic_value d2 ON e.e_department=d2.id
+    LEFT JOIN tbl_dic_value d3 ON e.od_type=d3.id
+    <where>
+      <if test="name!=null and name!=''">
+        e.e_name LIKE '%' #{name} '%'
+      </if>
+      <if test="department!=null and department!=''">
+        AND e.e_department=#{department}
+      </if>
+      <if test="position!=null and position!=''">
+        AND e.e_position=#{ePosition}
+      </if>
+      <if test="odType!=null and odType!='' and odType=='是'">
+        AND e.od_type IS NOT NULL
+      </if>
+      <if test="odType!=null and odType!='' and odType=='否'">
+        AND e.od_type IS NULL
+      </if>
+    </where>
+  </select>
+
+  <!--int insertEmployee(Employee employee);-->
+  <insert id="insertEmployee">
+    INSERT INTO tbl_employee(eid, e_user_name, e_password, e_allow_ips, e_email, e_expire_time, e_lock_state,
+    e_name, e_gender, e_age, e_position, e_department, e_phone, grade ,od_type)
+    VALUES(#{eid},#{eUserName},#{ePassword},#{eAllowIps},#{eEmail},#{eExpireTime},#{eLockState},#{eName},
+    #{eGender},#{eAge},#{ePosition},#{eDepartment},#{ePhone},#{grade},#{odType})
+  </insert>
+
+  <!--int updateEmployee(Employee employee);-->
+  <update id="updateEmployee">
+    UPDATE tbl_employee SET e_user_name=#{eUserName}, e_password=#{ePassword}, e_allow_ips=#{eAllowIps}, e_email=#{eEmail},
+    e_expire_time=#{eExpireTime}, e_lock_state=#{eLockState},e_name=#{eName}, e_gender=#{eGender}, e_age=#{eAge},
+    e_position=#{ePosition}, e_department=#{eDepartment}, e_phone=#{ePhone}, grade=#{grade}, od_type=#{odType}
+    WHERE eid=#{eid}
+  </update>
+
+  <!--int deleteEmployeeByIds(String[] ids);-->
+  <delete id="deleteEmployeeByIds">
+    DELETE FROM tbl_employee
+    WHERE eid in
+    <foreach collection="array" item="id" open="(" close=")" separator=",">
+      #{id}
+    </foreach>
+  </delete>
+
+  <!--Employee selectEmployeeForDetailById(String id);-->
+  <select id="selectEmployeeForDetailById" resultMap="BaseResultMap">
+    SELECT e.eid, e.e_user_name, e.e_password, e.e_allow_ips, e.e_email, e.e_expire_time, e.e_lock_state,
+    e.e_name, e.e_gender, e.e_age,d1.value e_position,d2.value e_department, e.e_phone, e.grade,d3.value od_type
+    FROM tbl_employee e
+    JOIN tbl_dic_value d1 ON e.e_position=d1.id
+    LEFT JOIN tbl_dic_value d2 ON e.e_department=d2.id
+    LEFT JOIN tbl_dic_value d3 ON e.od_type=d3.id
+    WHERE e.eid=#{id}
   </select>
 </mapper>

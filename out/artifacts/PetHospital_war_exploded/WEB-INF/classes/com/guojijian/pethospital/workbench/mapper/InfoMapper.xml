@@ -85,13 +85,13 @@
         i.i_title like '%' #{iTitle} '%'
       </if>
       <if test="iInfotype!=null and iInfotype!=''">
-        i.i_infotype=#{iInfotype}
+        AND i.i_infotype=#{iInfotype}
       </if>
       <if test="startDate!=null and startDate!=''">
-        i.i_time>=#{startDate}
+        AND i.i_time>=#{startDate}
       </if>
       <if test="endDate!=null and endDate!=''">
-        #{endDate}>=i.i_time
+        AND #{endDate}>=i.i_time
       </if>
     </where>
   </select>

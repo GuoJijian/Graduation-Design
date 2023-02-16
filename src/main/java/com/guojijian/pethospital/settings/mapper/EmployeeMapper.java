@@ -2,6 +2,7 @@ package com.guojijian.pethospital.settings.mapper;
 
 import com.guojijian.pethospital.settings.pojo.Employee;
 import java.util.List;
+import java.util.Map;
 
 public interface EmployeeMapper {
     /**
@@ -48,4 +49,31 @@ public interface EmployeeMapper {
      * 根据账号和密码查询员工
      */
     Employee selectEmployeeByActAndPwd(Employee employee);
+
+    /**
+     * 根据条件分页查询员工
+     * @param map
+     * @return
+     */
+    List<Employee> selectEmployeeForPageByCondition(Map<String ,Object> map);
+
+    /**
+     * 创建新员工
+     */
+    int insertEmployee(Employee employee);
+
+    /**
+     * 修改员工信息
+     */
+    int updateEmployee(Employee employee);
+
+    /**
+     * 批量删除员工
+     */
+    int deleteEmployeeByIds(String[] ids);
+
+    /**
+     * 根据id查询员工的详细信息
+     */
+    Employee selectEmployeeForDetailById(String id);
 }
