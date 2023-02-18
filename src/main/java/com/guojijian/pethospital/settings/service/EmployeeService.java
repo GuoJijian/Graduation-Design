@@ -35,4 +35,9 @@ public interface EmployeeService {
      * 根据id查询员工的详细信息
      */
     Employee queryEmployeeForDetailById(String id);
+
+    /**
+     * 根据条件分页查询医生
+     */
+    List<Employee> queryDoctorForPageByCondition(Map<String,Object> map);
 }

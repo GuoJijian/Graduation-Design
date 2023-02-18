@@ -11,4 +11,8 @@ public class Contants {
     public static final String GRADE_LEVEL_TWO="2";
     public static final String GRADE_LEVEL_THREE="3";
     public static final String GRADE_LEVEL_FOUR="4";
+    //保存预约状态（0：已取消；1：已预约；2：已完成）
+    public static final String APPOINTMENT_STATUS_CANCEL="0";
+    public static final String APPOINTMENT_STATUS_ADVANCE="1";
+    public static final String APPOINTMENT_STATUS_PERFORM="2";
 }

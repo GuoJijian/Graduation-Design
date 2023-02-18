@@ -16,139 +16,270 @@
 <script type="text/javascript">
 
 	$(function(){
+		//创建vue对象
+		var vue=new Vue({
+			el:'#content',
+			data:{
+				doctorList:[],
+				page:{
+					pageSize:10,
+					pageNum:1,
+					total:0
+				},
+				userId:'',
+				appointment:{
+
+				},
+
+				//搜索参数
+				name:'',
+				department:'',
+				position:'',
+				odType:'',
+
+				//创建参数
+				doctorId:'',
+				createName:'',
+				createDepartment:'',
+				createPosition:'',
+				createOdType:'',
+				createDate:'',
+
+				//取消参数
+				aid:''
+
+			},
+			methods:{
+				queryDoctorForPageByCondition:function () {
+					axios({
+						url:'/workbench/appointment/queryDoctorForPageByCondition',
+						method:'post',
+						params:{
+							name:this.name,
+							department:this.department,
+							position:this.position,
+							odType:this.odType,
+							pageSize:this.page.pageSize,
+							pageNum:this.page.pageNum
+						}
+					})
+					.then(function (value) {
+						vue.doctorList=value.data.doctorList;
+						vue.page=value.data.page;
+
+						//根据用户查询预约记录，判断是否存在预约记录
+						vue.queryAppointmentByUserId();
+					});
+				},
+				createAppointment:function () {
+					axios({
+						url:'/workbench/appointment/createAppointment',
+						method:'post',
+						params:{
+							aDate:this.createDate,
+							pid:this.userId,
+							eid:this.doctorId
+						}
+					})
+					.then(function (value) {
+						if(value.data.code=="1"){
+							//刷新预约列表
+							$("#doctorListTbody button").attr("class","btn btn-default disabled");
+							//关闭创建预约的模态窗口
+							$("#createAppointmentModal").modal("hide");
+							//提示
+							alert("预约成功！");
+						}else{
+							alert(value.data.message);
+						}
+					});
+				},
+				queryAppointmentByUserId:function () {
+					axios({
+						url:'/workbench/appointment/queryAppointmentByUserId',
+						method:'post',
+						params:{
+							userId:this.userId
+						}
+					})
+					.then(function (value) {
+						if(value.data.code=="1"){
+							vue.appointment=value.data;
+
+							if(vue.appointment!=null){
+								//刷新预约列表
+								$("#doctorListTbody button").attr("class","btn btn-default disabled");
+							}
+						}
+					});
+				},
+				cancelAppointmentById:function () {
+					axios({
+						url:'/workbench/appointment/cancelAppointmentById',
+						method:'post',
+						params:{
+							aid:this.aid
+						}
+					})
+					.then(function (value) {
+						if(value.data.code=="1"){
+							//刷新预约记录列表
+							$("#checkAppointmentTbody td[status='status']").text("已取消");
+							$("#checkAppointmentTbody button").attr("class","btn btn-danger disabled");
+							//刷新预约列表
+							$("#doctorListTbody button").attr("class","btn btn-default");
+							//提示
+							alert("取消预约成功！");
+						}else{
+							alert(value.data.message);
+						}
+					});
+				}
+			}
+		});
 		
-		
-		
+		//初始化医生列表
+		vue.queryDoctorForPageByCondition();
+		//初始化用户信息
+		vue.userId=$("#content").attr("userId");
+
+		//给可点击的预约按钮添加单击事件
+		$("#doctorListTbody").on("click","button[class='btn btn-default']",function () {
+			//获取参数
+			vue.doctorId=$(this).attr("doctorId");
+			vue.createName=$("#tr_"+vue.doctorId+" a").text();
+			vue.createDepartment=$("#tr_"+vue.doctorId+" td[department='department']").text();
+			vue.createPosition=$("#tr_"+vue.doctorId+" td[position='position']").text();
+			vue.createOdType=$("#tr_"+vue.doctorId+" td[odType='odType']").text();
+			//显示创建预约的模态窗口
+			$("#createAppointmentModal").modal("show");
+		});
+
+		//给保存按钮添加单击事件
+		$("#saveAppointmentBtn").click(function () {
+			//验证
+			if(vue.createDate==""){
+				alert("预约时间不可为空！");
+				return;
+			}
+			//创建预约
+			vue.createAppointment();
+		});
+
+		//给我的预约按钮添加单击事件
+		$("#checkAppointmentBtn").click(function () {
+			//验证
+			//查询预约记录
+			vue.queryAppointmentByUserId();
+			//显示预约记录的模态窗口
+			$("#checkAppointmentModal").modal("show");
+		});
+
+		//给取消按钮添加单击事件
+		$("#checkAppointmentTbody").on("click","button[class='btn btn-danger']",function () {
+			//验证
+			if(!window.confirm("确认是否取消预约？")){
+				return;
+			}
+			//获取参数
+			vue.aid=this.value;
+			//取消预约
+			vue.cancelAppointmentById();
+		});
 	});
 	
 </script>
 </head>
 <body>
-
-	<!-- 创建市场活动的模态窗口 -->
-	<div class="modal fade" id="createActivityModal" role="dialog">
-		<div class="modal-dialog" role="document" style="width: 85%;">
+<div id="content" th:userId="${userId}">
+	<!-- 预约的模态窗口 -->
+	<div class="modal fade" id="createAppointmentModal" role="dialog">
+		<div class="modal-dialog" role="document" style="width: 90%;">
 			<div class="modal-content">
 				<div class="modal-header">
 					<button type="button" class="close" data-dismiss="modal">
 						<span aria-hidden="true">×</span>
 					</button>
-					<h4 class="modal-title" id="myModalLabel1">创建市场活动</h4>
+					<h4 class="modal-title" id="myModalLabel1">预约</h4>
 				</div>
 				<div class="modal-body">
-				
 					<form class="form-horizontal" role="form">
-					
-						<div class="form-group">
-							<label for="create-marketActivityOwner" class="col-sm-2 control-label">所有者<span style="font-size: 15px; color: red;">*</span></label>
-							<div class="col-sm-10" style="width: 300px;">
-								<select class="form-control" id="create-marketActivityOwner">
-								  <option>zhangsan</option>
-								  <option>lisi</option>
-								  <option>wangwu</option>
-								</select>
-							</div>
-                            <label for="create-marketActivityName" class="col-sm-2 control-label">名称<span style="font-size: 15px; color: red;">*</span></label>
-                            <div class="col-sm-10" style="width: 300px;">
-                                <input type="text" class="form-control" id="create-marketActivityName">
-                            </div>
-						</div>
-						
-						<div class="form-group">
-							<label for="create-startTime" class="col-sm-2 control-label">开始日期</label>
-							<div class="col-sm-10" style="width: 300px;">
-								<input type="text" class="form-control" id="create-startTime">
-							</div>
-							<label for="create-endTime" class="col-sm-2 control-label">结束日期</label>
-							<div class="col-sm-10" style="width: 300px;">
-								<input type="text" class="form-control" id="create-endTime">
-							</div>
-						</div>
-                        <div class="form-group">
 
-                            <label for="create-cost" class="col-sm-2 control-label">成本</label>
-                            <div class="col-sm-10" style="width: 300px;">
-                                <input type="text" class="form-control" id="create-cost">
-                            </div>
-                        </div>
 						<div class="form-group">
-							<label for="create-describe" class="col-sm-2 control-label">描述</label>
-							<div class="col-sm-10" style="width: 81%;">
-								<textarea class="form-control" rows="3" id="create-describe"></textarea>
+							<label for="create-name" class="col-sm-2 control-label">名称</label>
+							<div class="col-sm-10" style="width: 300px;">
+								<input type="text" class="form-control" id="create-name" v-model="createName" readonly>
+							</div>
+							<label for="create-position" class="col-sm-2 control-label">职称</label>
+							<div class="col-sm-10" style="width: 300px;">
+								<input type="text" class="form-control" id="create-position" v-model="createPosition" readonly>
 							</div>
 						</div>
-						
+
+						<div class="form-group">
+							<label for="create-department" class="col-sm-2 control-label">所属科室</label>
+							<div class="col-sm-10" style="width: 300px;">
+								<input type="text" class="form-control" id="create-department" v-model="createDepartment" readonly>
+							</div>
+							<label for="create-odType" class="col-sm-2 control-label">排班</label>
+							<div class="col-sm-10" style="width: 300px;">
+								<input type="text" class="form-control" id="create-odType" v-model="createOdType" readonly>
+							</div>
+						</div>
+
+						<div class="form-group">
+							<label for="create-date" class="col-sm-2 control-label">预约时间<span style="font-size: 15px; color: red;">*</span></label>
+							<div class="col-sm-10" style="width: 300px;">
+								<input type="text" class="form-control" id="create-date" v-model="createDate">
+							</div>
+						</div>
 					</form>
-					
+
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-					<button type="button" class="btn btn-primary" data-dismiss="modal">保存</button>
+					<button id="saveAppointmentBtn" type="button" class="btn btn-primary">保存</button>
 				</div>
 			</div>
 		</div>
 	</div>
 	
-	<!-- 修改市场活动的模态窗口 -->
-	<div class="modal fade" id="editActivityModal" role="dialog">
-		<div class="modal-dialog" role="document" style="width: 85%;">
+	<!-- 查询预约记录的模态窗口 -->
+	<div class="modal fade" id="checkAppointmentModal" role="dialog">
+		<div class="modal-dialog" role="document" style="width: 90%;">
 			<div class="modal-content">
 				<div class="modal-header">
 					<button type="button" class="close" data-dismiss="modal">
 						<span aria-hidden="true">×</span>
 					</button>
-					<h4 class="modal-title" id="myModalLabel2">修改市场活动</h4>
+					<h4 class="modal-title" id="myModalLabel2">预约记录</h4>
 				</div>
 				<div class="modal-body">
-				
-					<form class="form-horizontal" role="form">
-					
-						<div class="form-group">
-							<label for="edit-marketActivityOwner" class="col-sm-2 control-label">所有者<span style="font-size: 15px; color: red;">*</span></label>
-							<div class="col-sm-10" style="width: 300px;">
-								<select class="form-control" id="edit-marketActivityOwner">
-								  <option>zhangsan</option>
-								  <option>lisi</option>
-								  <option>wangwu</option>
-								</select>
-							</div>
-                            <label for="edit-marketActivityName" class="col-sm-2 control-label">名称<span style="font-size: 15px; color: red;">*</span></label>
-                            <div class="col-sm-10" style="width: 300px;">
-                                <input type="text" class="form-control" id="edit-marketActivityName" value="发传单">
-                            </div>
-						</div>
 
-						<div class="form-group">
-							<label for="edit-startTime" class="col-sm-2 control-label">开始日期</label>
-							<div class="col-sm-10" style="width: 300px;">
-								<input type="text" class="form-control" id="edit-startTime" value="2020-10-10">
-							</div>
-							<label for="edit-endTime" class="col-sm-2 control-label">结束日期</label>
-							<div class="col-sm-10" style="width: 300px;">
-								<input type="text" class="form-control" id="edit-endTime" value="2020-10-20">
-							</div>
-						</div>
-						
-						<div class="form-group">
-							<label for="edit-cost" class="col-sm-2 control-label">成本</label>
-							<div class="col-sm-10" style="width: 300px;">
-								<input type="text" class="form-control" id="edit-cost" value="5,000">
-							</div>
-						</div>
-						
-						<div class="form-group">
-							<label for="edit-describe" class="col-sm-2 control-label">描述</label>
-							<div class="col-sm-10" style="width: 81%;">
-								<textarea class="form-control" rows="3" id="edit-describe">市场活动Marketing，是指品牌主办或参与的展览会议与公关市场活动，包括自行主办的各类研讨会、客户交流会、演示会、新产品发布会、体验会、答谢会、年会和出席参加并布展或演讲的展览会、研讨会、行业交流会、颁奖典礼等</textarea>
-							</div>
-						</div>
-						
-					</form>
+					<table id="activityTable" class="table table-hover" style="width: 900px; position: relative;top: 10px;">
+						<thead>
+							<tr style="color: #B3B3B3;">
+								<td>预约日期</td>
+								<td>预约科室</td>
+								<td>预约状态</td>
+								<td>操作</td>
+								<td></td>
+							</tr>
+						</thead>
+						<tbody id="checkAppointmentTbody">
+							<tr>
+								<td>{{appointment.aDate}}</td>
+								<td>{{appointment.eid}}</td>
+								<td status="status">{{appointment.aStatus}}</td>
+								<td><button v-if="appointment.aid!=''" :value="appointment.aid" type="button" class="btn btn-danger"><span class="glyphicon glyphicon-minus"></span> 取消</button></td>
+								<td></td>
+							</tr>
+						</tbody>
+					</table>
 					
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-					<button type="button" class="btn btn-primary" data-dismiss="modal">更新</button>
 				</div>
 			</div>
 		</div>
@@ -157,7 +288,7 @@
 	<div>
 		<div style="position: relative; left: 10px; top: -10px;">
 			<div class="page-header">
-				<h3>市场活动列表</h3>
+				<h3>预约列表</h3>
 			</div>
 		</div>
 	</div>
@@ -170,28 +301,28 @@
 				  <div class="form-group">
 				    <div class="input-group">
 				      <div class="input-group-addon">名称</div>
-				      <input class="form-control" type="text">
+				      <input class="form-control" type="text" v-model="name">
 				    </div>
 				  </div>
 				  
 				  <div class="form-group">
 				    <div class="input-group">
-				      <div class="input-group-addon">所有者</div>
-				      <input class="form-control" type="text">
+				      <div class="input-group-addon">职称</div>
+				      <input class="form-control" type="text" v-model="position">
 				    </div>
 				  </div>
 
 
 				  <div class="form-group">
 				    <div class="input-group">
-				      <div class="input-group-addon">开始日期</div>
-					  <input class="form-control" type="text" id="startTime" />
+				      <div class="input-group-addon">所属科室</div>
+					  <input class="form-control" type="text" id="departmentInput" v-model="department"/>
 				    </div>
 				  </div>
 				  <div class="form-group">
 				    <div class="input-group">
 				      <div class="input-group-addon">结束日期</div>
-					  <input class="form-control" type="text" id="endTime">
+					  <input class="form-control" type="text" id="odTypeInput" v-model="odType">
 				    </div>
 				  </div>
 				  
@@ -201,9 +332,7 @@
 			</div>
 			<div class="btn-toolbar" role="toolbar" style="background-color: #F7F7F7; height: 50px; position: relative;top: 5px;">
 				<div class="btn-group" style="position: relative; top: 18%;">
-				  <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createActivityModal"><span class="glyphicon glyphicon-plus"></span> 创建</button>
-				  <button type="button" class="btn btn-default" data-toggle="modal" data-target="#editActivityModal"><span class="glyphicon glyphicon-pencil"></span> 修改</button>
-				  <button type="button" class="btn btn-danger"><span class="glyphicon glyphicon-minus"></span> 删除</button>
+				  <button id="checkAppointmentBtn" type="button" class="btn btn-default"><span class="glyphicon glyphicon-pencil"></span> 我的预约</button>
 				</div>
 			</div>
 			<div style="position: relative;top: 10px;">
@@ -214,16 +343,16 @@
                             <td>医生职称</td>
 							<td>所属科室</td>
 							<td>排班</td>
-							<td>是否预约</td>
+							<td>操作</td>
 						</tr>
 					</thead>
-					<tbody>
-						<tr class="active">
-							<td><input type="checkbox" /></td>
-							<td><a style="text-decoration: none; cursor: pointer;" onclick="window.location.href='detail.html';">发传单</a></td>
-                            <td>zhangsan</td>
-							<td>2020-10-10</td>
-							<td>2020-10-20</td>
+					<tbody id="doctorListTbody">
+						<tr :id="'tr_'+doctor.eid" v-for="doctor in doctorList">
+							<td><a>{{doctor.eName}}</a></td>
+							<td position="position">{{doctor.ePosition}}</td>
+                            <td department="department">{{doctor.eDepartment}}</td>
+							<td odType="odType">{{doctor.odType}}</td>
+							<td><button id="appointmentBtn" :doctorId="doctor.eid" type="submit" class="btn btn-default">预约</button></td>
 						</tr>
 					</tbody>
 				</table>
@@ -267,5 +396,6 @@
 		</div>
 		
 	</div>
+</div>
 </body>
 </html>

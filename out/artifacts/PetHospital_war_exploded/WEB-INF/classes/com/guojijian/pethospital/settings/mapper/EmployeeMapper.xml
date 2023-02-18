@@ -163,4 +163,29 @@
     LEFT JOIN tbl_dic_value d3 ON e.od_type=d3.id
     WHERE e.eid=#{id}
   </select>
+
+  <!--List<Employee> selectDoctorForPageByCondition(Map<String,Object> map);-->
+  <select id="selectDoctorForPageByCondition" resultMap="BaseResultMap">
+    SELECT eid, e_user_name, e_password, e_allow_ips, e_email, e_expire_time, e_lock_state,
+    e_name, e_gender, e_age, d1.value e_position, d2.value e_department, e_phone, grade , d3.value od_type
+    FROM tbl_employee e
+    JOIN tbl_dic_value d1 ON e.e_position=d1.id
+    LEFT JOIN tbl_dic_value d2 ON e.e_department=d2.id
+    LEFT JOIN tbl_dic_value d3 ON e.od_type=d3.id
+    <where>
+      e.grade='3'
+      <if test="name!=null and name!=''">
+        AND e.e_name LIKE '%' #{name} '%'
+      </if>
+      <if test="department!=null and department!=''">
+        AND e.e_department=#{department}
+      </if>
+      <if test="position!=null and position!=''">
+        AND e.e_position=#{ePosition}
+      </if>
+      <if test="odType!=null and odType!=''">
+        AND e.od_type=#{odType}
+      </if>
+    </where>
+  </select>
 </mapper>
