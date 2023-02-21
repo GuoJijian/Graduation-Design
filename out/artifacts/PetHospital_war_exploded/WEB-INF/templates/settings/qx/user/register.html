@@ -112,8 +112,7 @@
 			<div class="col-sm-10" style="width: 300px;">
 				<select class="form-control" id="create-call" v-model="call">
 					<option></option>
-					<option>先生</option>
-					<option th:each="stage : ${stageList}" th:value="${stage.id}" th:text="${stage.value}">先生</option>
+					<option th:each="call : ${callList}" th:value="${call.id}" th:text="${call.value}">先生</option>
 					<!--			  	<option>需求分析</option>-->
 					<!--			  	<option>价值建议</option>-->
 					<!--			  	<option>确定决策者</option>-->
@@ -153,7 +152,9 @@
 			<div class="col-sm-10" style="width: 300px;">
 				<select class="form-control" id="create-sex" v-model="sex">
 					<option></option>
-					<option th:each="stage : ${stageList}" th:value="${stage.id}" th:text="${stage.value}">公</option>
+					<option value="公">公</option>
+					<option value="母">母</option>
+
 					<!--			  	<option>需求分析</option>-->
 					<!--			  	<option>价值建议</option>-->
 					<!--			  	<option>确定决策者</option>-->
@@ -168,7 +169,7 @@
 			<div class="col-sm-10" style="width: 300px;">
 				<select class="form-control" id="create-type">
 					<option></option>
-					<option th:each="stage : ${stageList}" th:value="${stage.id}" th:text="${stage.value}">狗</option>
+					<option th:each="petType : ${petTypeList}" th:value="${petType.id}" th:text="${petType.value}">狗</option>
 					<!--			  	<option>需求分析</option>-->
 					<!--			  	<option>价值建议</option>-->
 					<!--			  	<option>确定决策者</option>-->
@@ -186,7 +187,7 @@
 			<div class="col-sm-10" style="width: 300px;">
 				<select class="form-control" id="create-breed" v-model="breed">
 					<option></option>
-					<option th:each="type : ${tranTypeList}" th:value="${type.id}" th:text="${type.value}">哈士奇</option>
+					<option th:each="petBreed : ${petBreedList}" th:value="${petBreed.id}" th:text="${petBreed.value}">哈士奇</option>
 					<!--				  <option>新业务</option>-->
 				</select>
 			</div>

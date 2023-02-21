@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+
+<link th:href="@{/static/jquery/bootstrap_3.3.0/css/bootstrap.min.css}" type="text/css" rel="stylesheet" />
+<link th:href="@{/static/jquery/bootstrap-datetimepicker-master/css/bootstrap-datetimepicker.min.css}" type="text/css" rel="stylesheet" />
+
+<script type="text/javascript" th:src="@{/static/jquery/jquery-1.11.1-min.js}"></script>
+<script type="text/javascript" th:src="@{/static/jquery/bootstrap_3.3.0/js/bootstrap.min.js}"></script>
+<script type="text/javascript" th:src="@{/static/jquery/bootstrap-datetimepicker-master/js/bootstrap-datetimepicker.js}"></script>
+<script type="text/javascript" th:src="@{/static/jquery/bootstrap-datetimepicker-master/locale/bootstrap-datetimepicker.zh-CN.js}"></script>
+<script type="text/javascript" th:src="@{/static/jquery/vue.js}"></script>
+<script type="text/javascript" th:src="@{/static/jquery/axios.min.js}"></script>
+
+<script type="text/javascript">
+
+	$(function(){
+		//创建vue对象
+		var vue=new Vue({
+			el:'#content',
+			data:{
+				registeredList:[],
+				page:{
+					pageSize:10,
+					pageNum:1,
+					total:0
+				},
+				doctorList:[],
+				petOwnerList:[],
+
+				//条件查询参数
+				department:'',
+				date:'',
+				phone:'',
+
+				//查询参数
+				searchDepartment:'',
+				searchPhone:'',
+				searchDoctorId:'',
+				searchPetOwnerId:'',
+
+				//修改参数
+				editRid:'',
+
+				//删除参数
+				ids:''
+			},
+			methods:{
+				queryRegisteredForPageByCondition:function () {
+					axios({
+						url:'/workbench/registered/queryRegisteredForPageByCondition',
+						method:'post',
+						params:{
+							department:this.department,
+							date:this.date,
+							phone:this.phone,
+							pageSize:this.page.pageSize,
+							pageNum:this.page.pageNum
+						}
+					})
+					.then(function (value) {
+						vue.registeredList=value.data.registeredList;
+						vue.page=value.data.page;
+
+						//刷新页码栏状态
+						if(vue.page.hasPreviousPage){
+							$("#paginationUl li[class='isPrePage disabled']").attr("class","isPrePage");
+						}else{
+							$("#paginationUl li[class='isPrePage']").attr("class","isPrePage disabled");
+						}
+						if(vue.page.hasNextPage){
+							$("#paginationUl li[class='isNextPage disabled']").attr("class","isNextPage");
+						}else{
+							$("#paginationUl li[class='isNextPage']").attr("class","isNextPage disabled");
+						}
+						$("#paginationUl li[class='pageNum active']").attr("class","pageNum");
+						$("#paginationUl li[id='li_"+vue.page.pageNum+"']").attr("class","pageNum active");
+					});
+				},
+				createRegistered:function () {
+					axios({
+						url:'/workbench/registered/createRegistered',
+						method:'post',
+						params:{
+							pid:this.searchPetOwnerId,
+							doctor:this.searchDoctorId
+						}
+					})
+					.then(function (value) {
+						if(value.data.code=="1"){
+							//刷新挂号列表
+							var html="";
+							html+="<tr id=\"tr_"+value.data.retObject.rid+"\" class=\"active\">";
+							html+="<td><input value=\""+value.data.retObject.rid+"\" type=\"checkbox\" /></td>";
+							html+="<td><a style=\"text-decoration: none; cursor: pointer; registeredId=\""+value.data.retObject.rid+"\"\">"+value.data.retObject.pid+"</a></td>";
+							html+="<td phone=\"phone\">"+value.data.retObject.pPhone+"</td>";
+							html+="<td>"+value.data.retObject.rDate+"</td>";
+							html+="<td department=\"department\">"+value.data.retObject.rDepartment+"</td>";
+							html+="<td price=\"price\">"+value.data.retObject.rPrice+"</td>";
+							html+="<td type=\"type\">"+value.data.retObject.pType+"</td>";
+							html+="<td eid=\"eid\">"+value.data.retObject.eid+"</td>";
+							html+="</tr>";
+							$("#registeredListTbody").append(html);
+							//隐藏创建挂号的模态窗口
+							$("#createRegisteredModal").modal("hide");
+							//提示
+							alert("创建成功！");
+						}else{
+							alert(value.data.message);
+						}
+					});
+				},
+				queryDoctorByDepartment:function () {
+					axios({
+						url:'/workbench/registered/queryDoctorByDepartment',
+						method:'post',
+						params:{
+							department:this.searchDepartment
+						}
+					})
+					.then(function (value) {
+						vue.doctorList=value.data;
+					});
+				},
+				queryPetOwnerForFuzzyByPhone:function () {
+					axios({
+						url:'/workbench/registered/queryPetOwnerForFuzzyByPhone',
+						method:'post',
+						params:{
+							phone:this.searchPhone
+						}
+					})
+					.then(function (value) {
+						vue.petOwnerList=value.data;
+					});
+				},
+				alterRegistered:function () {
+					axios({
+						url:'/workbench/registered/alterRegistered',
+						method:'post',
+						params:{
+							rid:this.editRid,
+							doctor:this.searchDoctorId,
+							pid:this.searchPetOwnerId
+						}
+					})
+					.then(function (value) {
+						if(value.data.code=="1") {
+							//刷新挂号信息列表
+							$("#tr_"+vue.editRid+" a").text(value.data.retObject.pid);
+							$("#tr_"+vue.editRid+" td[phone='phone']").text(value.data.retObject.pPhone);
+							$("#tr_"+vue.editRid+" td[department='department']").text(value.data.retObject.rDepartment);
+							$("#tr_"+vue.editRid+" td[price='price']").text(value.data.retObject.rPrice);
+							$("#tr_"+vue.editRid+" td[type='type']").text(value.data.retObject.pType);
+							$("#tr_"+vue.editRid+" td[eid='eid']").text(value.data.retObject.eid);
+							//关闭修改的模态窗口
+							$("#editRegisteredModal").modal("hide");
+							//提示
+							alert("修改成功！");
+						}else{
+							alert(value.data.message);
+						}
+					});
+				},
+				queryRegisteredById:function () {
+					axios({
+						url:'/workbench/registered/queryRegisteredById',
+						method:'post',
+						params:{
+							id:this.editRid
+						}
+					})
+					.then(function (value) {
+						//为修改挂号的模态窗口赋值
+						$("#edit-doctorName").val(value.data.doctorName);
+						$("#edit-position").val(value.data.doctorPosition);
+						$("#edit-department").val(value.data.rDepartment);
+						$("#edit-odType").val(value.data.doctorOdType);
+						$("#edit-userName").val(value.data.pName);
+						$("#edit-phone").val(value.data.pPhone);
+						$("#edit-type").val(value.data.pType);
+						$("#edit-breed").val(value.data.pBreed);
+						//为vue对象赋值
+						vue.searchDoctorId=value.data.doctor;
+						vue.searchPetOwnerId=value.data.pid;
+					});
+				},
+				dropRegisteredByIds:function () {
+					axios({
+						url:'/workbench/registered/dropRegisteredByIds',
+						method:'post',
+						data:this.ids
+					})
+					.then(function (value) {
+						if(value.data.code=="1"){
+							//刷新挂号信息列表
+							var checked=$("#registeredListTbody input[type='checkbox']:checked");
+							checked.each(function () {
+								$("#tr_"+this.value).remove();
+							});
+							//提示
+							alert("删除成功！");
+						}else{
+							alert(value.data.message);
+						}
+					});
+				}
+			}
+		});
+
+		//初始化页面
+		vue.queryRegisteredForPageByCondition();
+
+		//给创建按钮添加单击事件
+		$("#createRegisteredBtn").click(function () {
+			//初始化表单
+			$("#createRegisteredModal form").get(0).reset();
+			//显示创建挂号的模态窗口
+			$("#createRegisteredModal").modal("show");
+		});
+
+		//给搜索医生按钮添加单击事件
+		$(".searchDoctor").click(function () {
+			//初始化搜索医生的模态窗口
+			$("#createDepartment").val("");
+			$("#doctorListTbody td").remove();
+			//显示搜索医生的模态窗口
+			$("#findMarketDoctor").modal("show");
+		});
+
+		//给搜索用户按钮添加单击事件
+		$(".searchPetOwner").click(function () {
+			//初始化搜索用户的模态窗口
+			vue.searchPhone="";
+			$("#petOwnerListTbody td").remove();
+			//显示搜索用户的模态窗口
+			$("#findMarketPetOwner").modal("show");
+		});
+
+		//给科室下拉框添加单击事件
+		$("#findMarketDoctor").on("click","option",function () {
+			//获取参数
+			vue.searchDepartment=$(this).val();
+			//根据科室查询医生
+			vue.queryDoctorByDepartment();
+		});
+
+		//给联系电话输入框添加单击事件
+		$("#pPhoneInput").keyup(function () {
+			//根据电话号码模糊查询用户
+			vue.queryPetOwnerForFuzzyByPhone();
+		});
+
+		//给医生列表中的单选按钮添加单击事件
+		$("#doctorListTbody").on("click","input",function () {
+			//获取参数
+			vue.searchDoctorId=$(this).val();
+			//为创建挂号的模态窗口赋值
+			$("#create-doctorName").val($("#tr_"+vue.searchDoctorId+" td[name='name']").text());
+			$("#create-department").val($("#tr_"+vue.searchDoctorId+" td[department='department']").text());
+			$("#create-position").val($("#tr_"+vue.searchDoctorId+" td[position='position']").text());
+			$("#create-odType").val($("#tr_"+vue.searchDoctorId+" td[odType='odType']").text());
+			//为修改挂号的模态窗口赋值
+			$("#edit-doctorName").val($("#tr_"+vue.searchDoctorId+" td[name='name']").text());
+			$("#edit-department").val($("#tr_"+vue.searchDoctorId+" td[department='department']").text());
+			$("#edit-position").val($("#tr_"+vue.searchDoctorId+" td[position='position']").text());
+			$("#edit-odType").val($("#tr_"+vue.searchDoctorId+" td[odType='odType']").text());
+			//关闭查找医生的模态窗口
+			$("#findMarketDoctor").modal("hide");
+		});
+
+		//给用户列表中的单选按钮添加单击事件
+		$("#petOwnerListTbody").on("click","input",function () {
+			//获取参数
+			vue.searchPetOwnerId=$(this).val();
+			//为创建挂号的模态窗口赋值
+			$("#create-userName").val($("#tr_"+vue.searchPetOwnerId+" td[userName='userName']").text());
+			$("#create-phone").val($("#tr_"+vue.searchPetOwnerId+" td[phone='phone']").text());
+			$("#create-type").val($("#tr_"+vue.searchPetOwnerId+" td[type='type']").text());
+			$("#create-breed").val($("#tr_"+vue.searchPetOwnerId+" td[breed='breed']").text());
+			//为修改挂号的模态窗口赋值
+			$("#edit-userName").val($("#tr_"+vue.searchPetOwnerId+" td[userName='userName']").text());
+			$("#edit-phone").val($("#tr_"+vue.searchPetOwnerId+" td[phone='phone']").text());
+			$("#edit-type").val($("#tr_"+vue.searchPetOwnerId+" td[type='type']").text());
+			$("#edit-breed").val($("#tr_"+vue.searchPetOwnerId+" td[breed='breed']").text());
+			//关闭查找用户的模态窗口
+			$("#findMarketPetOwner").modal("hide");
+		});
+
+		//给保存按钮添加单击事件
+		$("#saveRegisteredBtn").click(function () {
+			//表单验证
+			if(vue.searchDoctorId==""){
+				alert("请关联医生！");
+				return;
+			}
+			if(vue.searchPetOwnerId==""){
+				alert("请关联用户！");
+				return;
+			}
+			//创建挂号信息
+			vue.createRegistered();
+		});
+
+		//给修改按钮添加单击事件
+		$("#alterRegisteredBtn").click(function () {
+			//获取参数
+			var checked=$("#registeredListTbody input[type='checkbox']:checked");
+			//验证
+			if(checked.size()!=1){
+				alert("请选择一项挂号信息！");
+				return;
+			}
+			//为vue对象赋值
+			vue.editRid=$(checked).val();
+			vue.queryRegisteredById();
+			//显示修改挂号信息的模态窗口
+			$("#editRegisteredModal").modal("show");
+		});
+
+		//给更新按钮添加单击事件
+		$("#updateRegisteredBtn").click(function () {
+			//表单验证
+			if(vue.searchDoctorId==""){
+				alert("请关联医生！");
+				return;
+			}
+			if(vue.searchPetOwnerId==""){
+				alert("请关联用户！");
+				return;
+			}
+			//修改挂号信息
+			vue.alterRegistered();
+		});
+
+		//给删除按钮添加单击事件
+		$("#dropRegisteredBtn").click(function () {
+			//获取参数
+			var checked=$("#registeredListTbody input[type='checkbox']:checked");
+			//验证
+			if(checked.size()==0){
+				return;
+			}
+			if(!window.confirm("确认是否删除？")){
+				return;
+			}
+			//获取选中的挂号id
+			checked.each(function () {
+				vue.ids+="ids="+this.value+"&";
+			});
+			vue.ids=vue.ids.substr(0,vue.ids.lastIndexOf("&"));
+			//批量删除挂号信息
+			vue.dropRegisteredByIds();
+		});
+
+		//给挂号列表的全选复选框添加单击事件
+		$("#registeredListThead input").click(function () {
+			$("#registeredListTbody input").prop("checked",this.checked);
+		});
+
+		//给挂号列表的单选复选框添加单击事件
+		$("#registeredListTbody").on("click","input",function () {
+			//获取参数
+			var checked=$("#registeredListTbody input[type='checkbox']:checked");
+			var checkAll=$("#registeredListTbody input");
+			//验证
+			if(checked.size()==checkAll.size()){
+				$("#registeredListThead input").prop("checked",true);
+			}else{
+				$("#registeredListThead input").prop("checked",false);
+			}
+		});
+
+		//分页相关操作
+		//给页面大小下拉框添加单击事件
+		$("#pageSizeUl a").click(function () {
+			//获取参数
+			var pageSize=parseInt($(this).text());
+			//验证
+			if(pageSize==vue.page.pageSize){
+				return;
+			}
+			//为vue对象赋值
+			vue.page.pageSize=pageSize;
+			//刷新信息列表
+			vue.queryRegisteredForPageByCondition();
+		});
+
+		//给页码栏添加单击事件
+		$("#paginationUl li[class='isPrePage']").click(function () {
+			//为vue对象赋值
+			if($(this).children().text()=="首页"){
+				vue.page.pageNum=1;
+			}else{
+				vue.page.pageNum-=1;
+			}
+			//刷新信息列表
+			vue.queryRegisteredForPageByCondition();
+		});
+
+		$("#paginationUl").on("click","li[class='pageNum']",function () {
+			vue.page.pageNum=parseInt($(this).children().text());
+			//刷新信息列表
+			vue.queryRegisteredForPageByCondition();
+		});
+
+		$("#paginationUl li[class='isNextPage']").click(function () {
+			//为vue对象赋值
+			if($(this).children().text()=="尾页"){
+				vue.page.pageNum=vue.page.pages;
+			}else{
+				vue.page.pageNum+=1;
+			}
+			//刷新信息列表
+			vue.queryRegisteredForPageByCondition();
+		});
+
+		//给用户姓名超链接添加单击事件
+		$("#registeredListTbody").on("click","a",function () {
+			//获取参数
+			var rid=$(this).attr("registeredId");
+			//跳转页面
+			window.location.href="/workbench/registered/toDetail?id="+rid;
+		});
+	});
+	
+</script>
+</head>
+<body>
+<div id="content">
+	<!-- 查找医生 -->
+	<div class="modal fade" id="findMarketDoctor" role="dialog" style="z-index: 2000;">
+		<div class="modal-dialog" role="document" style="width: 80%;">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal">
+						<span aria-hidden="true">×</span>
+					</button>
+					<h4 class="modal-title">查找医生</h4>
+				</div>
+				<div class="modal-body">
+					<div class="btn-group" style="position: relative; top: 18%; left: 8px;">
+						<form class="form-inline" role="form">
+							<div class="form-group has-feedback">
+								<label for="createDepartment" class="col-sm-2 control-label">所属科室</label>
+								<div class="col-sm-10" style="width: 300px;">
+									<select class="form-control" id="createDepartment">
+										<option></option>
+										<option th:each="department : ${departmentList}" th:value="${department.id}" th:text="${department.value}">广告</option>
+									</select>
+								</div>
+							</div>
+						</form>
+					</div>
+
+					<table id="registeredTable1" class="table table-hover" style="width: 900px; position: relative;top: 10px;">
+						<thead>
+							<tr style="color: #B3B3B3;">
+								<td></td>
+								<td>医生姓名</td>
+								<td>所属科室</td>
+								<td>职称</td>
+								<td>排班</td>
+							</tr>
+						</thead>
+						<tbody id="doctorListTbody">
+							<tr :id="'tr_'+doctor.eid" v-for="doctor in doctorList">
+								<td><input type="radio" :value="doctor.eid" name="activity"/></td>
+								<td name="name">{{doctor.eName}}</td>
+								<td department="department">{{doctor.eDepartment}}</td>
+								<td position="position">{{doctor.ePosition}}</td>
+								<td odType="odType">{{doctor.odType}}</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- 查找用户 -->
+	<div class="modal fade" id="findMarketPetOwner" role="dialog" style="z-index:2000;">
+		<div class="modal-dialog" role="document" style="width: 80%;">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal">
+						<span aria-hidden="true">×</span>
+					</button>
+					<h4 class="modal-title">查找用户</h4>
+				</div>
+				<div class="modal-body">
+					<div class="btn-group" style="position: relative; top: 18%; left: 8px;">
+						<form class="form-inline" role="form">
+							<div class="form-group has-feedback">
+								<input id="pPhoneInput" v-model="searchPhone" type="text" class="form-control" style="width: 300px;" placeholder="请输入用户联系电话，支持模糊查询">
+								<span class="glyphicon glyphicon-search form-control-feedback"></span>
+							</div>
+						</form>
+					</div>
+					<table id="registeredTable2" class="table table-hover" style="width: 900px; position: relative;top: 10px;">
+						<thead>
+							<tr style="color: #B3B3B3;">
+								<td></td>
+								<td>用户姓名</td>
+								<td>联系电话</td>
+								<td>宠物类型</td>
+								<td>宠物品种</td>
+							</tr>
+						</thead>
+						<tbody id="petOwnerListTbody">
+							<tr :id="'tr_'+petOwner.pid" v-for="petOwner in petOwnerList">
+								<td><input type="radio" :value="petOwner.pid" name="activity"/></td>
+								<td userName="userName">{{petOwner.pUserName}}</td>
+								<td phone="phone">{{petOwner.pPhone}}</td>
+								<td type="type">{{petOwner.pType}}</td>
+								<td breed="breed">{{petOwner.pBreed}}</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- 创建挂号的模态窗口 -->
+	<div class="modal fade" id="createRegisteredModal" role="dialog">
+		<div class="modal-dialog" role="document" style="width: 90%;">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal">
+						<span aria-hidden="true">×</span>
+					</button>
+					<h4 class="modal-title" id="myModalLabel">创建挂号</h4>
+				</div>
+				<div class="modal-body">
+					<form class="form-horizontal" role="form">
+
+						<div id="createDoctorDiv" class="form-group">
+							<label for="create-doctorName" class="col-sm-2 control-label">医生姓名&nbsp;&nbsp;<a class="searchDoctor" href="javascript:void(0);"><span class="glyphicon glyphicon-search"></span></a></label>
+							<div class="col-sm-10" style="width: 300px;">
+								<input type="text" class="form-control" id="create-doctorName" placeholder="点击左边搜索" readonly>
+							</div>
+							<label for="create-department" class="col-sm-2 control-label">科室<span style="font-size: 15px; color: red;">*</span></label>
+							<div class="col-sm-10" style="width: 300px;">
+								<input type="text" class="form-control" id="create-department" readonly>
+							</div>
+						</div>
+						
+						<div class="form-group">
+							<label for="create-position" class="col-sm-2 control-label">职称</label>
+							<div class="col-sm-10" style="width: 300px;">
+								<input type="text" class="form-control" id="create-position" readonly>
+							</div>
+							<label for="create-odType" class="col-sm-2 control-label">排班</label>
+							<div class="col-sm-10" style="width: 300px;">
+								<input type="text" class="form-control" id="create-odType" readonly>
+							</div>
+						</div>
+
+						<div style="height: 1px; width: 103%; background-color: #D5D5D5; left: -13px; position: relative;"></div>
+
+						<div style="position: relative;top: 15px;">
+							<div id="createPetOwnerDiv" class="form-group">
+								<label for="create-userName" class="col-sm-2 control-label">用户姓名&nbsp;&nbsp;<a class="searchPetOwner" href="javascript:void(0);"><span class="glyphicon glyphicon-search"></span></a></label>
+								<div class="col-sm-10" style="width: 300px;">
+									<input type="text" class="form-control" id="create-userName" placeholder="点击左边搜索" readonly>
+								</div>
+								<label for="create-phone" class="col-sm-2 control-label">联系电话</label>
+								<div class="col-sm-10" style="width: 300px;">
+									<input type="text" class="form-control" id="create-phone" readonly>
+								</div>
+							</div>
+
+							<div class="form-group">
+								<label for="create-type" class="col-sm-2 control-label">宠物类别</label>
+								<div class="col-sm-10" style="width: 300px;">
+									<input type="text" class="form-control" id="create-type" readonly>
+								</div>
+								<label for="create-breed" class="col-sm-2 control-label">宠物品种</label>
+								<div class="col-sm-10" style="width: 300px;">
+									<input type="text" class="form-control" id="create-breed" readonly>
+								</div>
+							</div>
+						</div>
+					</form>
+					
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+					<button id="saveRegisteredBtn" type="button" class="btn btn-primary">保存</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<!-- 修改挂号的模态窗口 -->
+	<div class="modal fade" id="editRegisteredModal" role="dialog">
+		<div class="modal-dialog" role="document" style="width: 90%;">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal">
+						<span aria-hidden="true">×</span>
+					</button>
+					<h4 class="modal-title">修改挂号</h4>
+				</div>
+				<div class="modal-body">
+					<form class="form-horizontal" role="form">
+
+						<div id="editDoctorDiv" class="form-group">
+							<label for="edit-doctorName" class="col-sm-2 control-label">医生姓名&nbsp;&nbsp;<a class="searchDoctor" href="javascript:void(0);"><span class="glyphicon glyphicon-search"></span></a></label>
+							<div class="col-sm-10" style="width: 300px;">
+								<input type="text" class="form-control" id="edit-doctorName" placeholder="点击左边搜索" readonly>
+							</div>
+							<label for="edit-department" class="col-sm-2 control-label">科室<span style="font-size: 15px; color: red;">*</span></label>
+							<div class="col-sm-10" style="width: 300px;">
+								<input type="text" class="form-control" id="edit-department" readonly>
+							</div>
+						</div>
+
+						<div class="form-group">
+							<label for="edit-position" class="col-sm-2 control-label">职称</label>
+							<div class="col-sm-10" style="width: 300px;">
+								<input type="text" class="form-control" id="edit-position" readonly>
+							</div>
+							<label for="edit-odType" class="col-sm-2 control-label">排班</label>
+							<div class="col-sm-10" style="width: 300px;">
+								<input type="text" class="form-control" id="edit-odType" readonly>
+							</div>
+						</div>
+
+						<div style="height: 1px; width: 103%; background-color: #D5D5D5; left: -13px; position: relative;"></div>
+
+						<div style="position: relative;top: 15px;">
+							<div id="editPetOwnerDiv" class="form-group">
+								<label for="edit-userName" class="col-sm-2 control-label">用户姓名&nbsp;&nbsp;<a class="searchPetOwner" href="javascript:void(0);"><span class="glyphicon glyphicon-search"></span></a></label>
+								<div class="col-sm-10" style="width: 300px;">
+									<input type="text" class="form-control" id="edit-userName" placeholder="点击左边搜索" readonly>
+								</div>
+								<label for="edit-phone" class="col-sm-2 control-label">联系电话</label>
+								<div class="col-sm-10" style="width: 300px;">
+									<input type="text" class="form-control" id="edit-phone" readonly>
+								</div>
+							</div>
+
+							<div class="form-group">
+								<label for="edit-type" class="col-sm-2 control-label">宠物类别</label>
+								<div class="col-sm-10" style="width: 300px;">
+									<input type="text" class="form-control" id="edit-type" readonly>
+								</div>
+								<label for="edit-breed" class="col-sm-2 control-label">宠物品种</label>
+								<div class="col-sm-10" style="width: 300px;">
+									<input type="text" class="form-control" id="edit-breed" readonly>
+								</div>
+							</div>
+						</div>
+					</form>
+					
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+					<button id="updateRegisteredBtn" type="button" class="btn btn-primary">更新</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	
+	
+	
+	<div>
+		<div style="position: relative; left: 10px; top: -10px;">
+			<div class="page-header">
+				<h3>挂号列表</h3>
+			</div>
+		</div>
+	</div>
+	
+	<div style="position: relative; top: -20px; left: 0px; width: 100%; height: 100%;">
+	
+		<div style="width: 100%; position: absolute;top: 5px; left: 10px;">
+		
+			<div class="btn-toolbar" role="toolbar" style="height: 80px;">
+				<form class="form-inline" role="form" style="position: relative;top: 8%; left: 5px;">
+
+				  <div class="form-group">
+				    <div class="input-group">
+				      <div class="input-group-addon">所属科室</div>
+					  <select class="form-control" v-model="department">
+						  <option></option>
+						  <option th:each="department : ${departmentList}" th:value="${department.id}" th:text="${department.value}">将来联系</option>
+					  </select>
+				    </div>
+				  </div>
+				  
+				  <div class="form-group">
+				    <div class="input-group">
+				      <div class="input-group-addon">联系电话</div>
+				      <input class="form-control" type="text" v-model="phone">
+				    </div>
+				  </div>
+				  
+				  <div class="form-group">
+				    <div class="input-group">
+				      <div class="input-group-addon">挂号时间</div>
+				      <input class="form-control" type="text" v-model="date">
+				    </div>
+				  </div>
+
+				  <button type="submit" class="btn btn-default">查询</button>
+				  
+				</form>
+			</div>
+			<div class="btn-toolbar" role="toolbar" style="background-color: #F7F7F7; height: 50px; position: relative;top: 40px;">
+				<div class="btn-group" style="position: relative; top: 18%;">
+				  <button id="createRegisteredBtn" type="button" class="btn btn-primary"><span class="glyphicon glyphicon-plus"></span> 创建</button>
+				  <button id="alterRegisteredBtn" type="button" class="btn btn-default"><span class="glyphicon glyphicon-pencil"></span> 修改</button>
+				  <button id="dropRegisteredBtn" type="button" class="btn btn-danger"><span class="glyphicon glyphicon-minus"></span> 删除</button>
+				</div>
+				
+				
+			</div>
+			<div style="position: relative;top: 50px;">
+				<table class="table table-hover">
+					<thead id="registeredListThead">
+						<tr style="color: #B3B3B3;">
+							<td><input type="checkbox" /></td>
+							<td>用户名称</td>
+							<td>联系电话</td>
+							<td>挂号时间</td>
+							<td>所属科室</td>
+							<td>挂号费</td>
+							<td>宠物类别</td>
+							<td>创建者</td>
+						</tr>
+					</thead>
+					<tbody id="registeredListTbody">
+						<tr :id="'tr_'+registered.rid" v-for="registered in registeredList">
+							<td><input :value="registered.rid" type="checkbox" /></td>
+							<td><a style="text-decoration: none; cursor: pointer;" :registeredId="registered.rid">{{registered.pid}}</a></td>
+							<td phone="phone">{{registered.pPhone}}</td>
+							<td>{{registered.rDate}}</td>
+							<td department="department">{{registered.rDepartment}}</td>
+							<td price="price">{{registered.rPrice}}</td>
+							<td type="type">{{registered.pType}}</td>
+							<td eid="eid">{{registered.eid}}</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			
+			<div style="height: 50px; position: relative;top: 60px;">
+				<div>
+					<button type="button" class="btn btn-default" style="cursor: default;">共<b>{{page.total}}</b>条记录</button>
+				</div>
+				<div class="btn-group" style="position: relative;top: -34px; left: 110px;">
+					<button type="button" class="btn btn-default" style="cursor: default;">显示</button>
+					<div class="btn-group">
+						<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+							{{page.pageSize}}
+							<span class="caret"></span>
+						</button>
+						<ul id="pageSizeUl" class="dropdown-menu" role="menu">
+							<li><a href="#">10</a></li>
+							<li><a href="#">20</a></li>
+							<li><a href="#">30</a></li>
+						</ul>
+					</div>
+					<button type="button" class="btn btn-default" style="cursor: default;">条/页</button>
+				</div>
+				<div style="position: relative;top: -88px; left: 285px;">
+					<nav>
+						<ul id="paginationUl" class="pagination">
+							<li class="isPrePage"><a href="#">首页</a></li>
+							<li class="isPrePage"><a href="#">上一页</a></li>
+							<li :id="'li_'+pageNum" v-for="pageNum in page.navigatepageNums" class="pageNum"><a href="#">{{pageNum}}</a></li>
+							<!--							<li class="active"><a href="#">2</a></li>-->
+							<!--							<li><a href="#">3</a></li>-->
+							<!--							<li><a href="#">4</a></li>-->
+							<!--							<li><a href="#">5</a></li>-->
+							<li class="isNextPage"><a href="#">下一页</a></li>
+							<li class="isNextPage"><a href="#">末页</a></li>
+						</ul>
+					</nav>
+				</div>
+			</div>
+			
+		</div>
+		
+	</div>
+</div>
+</body>
+</html>

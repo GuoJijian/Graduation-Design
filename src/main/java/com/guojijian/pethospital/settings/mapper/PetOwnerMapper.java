@@ -54,4 +54,9 @@ public interface PetOwnerMapper {
      * 添加用户
      */
     int insertPetOwner(PetOwner petOwner);
+
+    /**
+     * 根据电话号码模糊查询用户
+     */
+    List<PetOwner> selectPetOwnerForFuzzyByPhone(String phone);
 }

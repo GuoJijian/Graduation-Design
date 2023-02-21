@@ -15,4 +15,8 @@ public class Contants {
     public static final String APPOINTMENT_STATUS_CANCEL="0";
     public static final String APPOINTMENT_STATUS_ADVANCE="1";
     public static final String APPOINTMENT_STATUS_PERFORM="2";
+    //保存门诊类型对应的费用
+    public static final Float ODTYPE_HEALTH=9f;
+    public static final Float ODTYPE_COMMON=18f;
+    public static final Float ODTYPE_EXPERT=36f;
 }

@@ -4,12 +4,15 @@ import com.guojijian.pethospital.commons.contants.Contants;
 import com.guojijian.pethospital.commons.pojo.ReturnObject;
 import com.guojijian.pethospital.commons.utils.DateUtils;
 import com.guojijian.pethospital.commons.utils.UUIDUtils;
+import com.guojijian.pethospital.settings.pojo.DicValue;
 import com.guojijian.pethospital.settings.pojo.Employee;
 import com.guojijian.pethospital.settings.pojo.PetOwner;
+import com.guojijian.pethospital.settings.service.DicValueService;
 import com.guojijian.pethospital.settings.service.PetOwnerService;
 import com.guojijian.pethospital.settings.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -19,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -28,6 +32,8 @@ public class UserController {
     private UserService userService;
     @Autowired
     private PetOwnerService petOwnerService;
+    @Autowired
+    private DicValueService dicValueService;
 
     @RequestMapping("/settings/qx/user/toLogin")
     public String toLogin(){
@@ -116,7 +122,15 @@ public class UserController {
     }
 
     @RequestMapping("/settings/qx/user/toRegister")
-    public String toRegister(){
+    public String toRegister(Model model){
+        List<DicValue> callList=dicValueService.queryDivValueByTypeCode("call");
+        List<DicValue> petTypeList=dicValueService.queryDivValueByTypeCode("petType");
+        List<DicValue> petBreedList=dicValueService.queryDivValueByTypeCode("petBreed");
+        //封装查询结果
+        model.addAttribute("callList",callList);
+        model.addAttribute("petTypeList",petTypeList);
+        model.addAttribute("petBreedList",petBreedList);
+
         return "settings/qx/user/register";
     }
 

@@ -81,4 +81,9 @@ public interface EmployeeMapper {
      * 根据条件分页查询医生
      */
     List<Employee> selectDoctorForPageByCondition(Map<String,Object> map);
+
+    /**
+     * 根据科室查询医生
+     */
+    List<Employee> selectDoctorByDepartment(String department);
 }

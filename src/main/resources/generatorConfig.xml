@@ -44,6 +44,7 @@
 <!--        <table tableName="tbl_dic_value" domainObjectName="DicValue"></table>-->
 <!--        <table tableName="tbl_info_comment" domainObjectName="InfoComment"></table>-->
 <!--        <table tableName="tbl_appointment" domainObjectName="Appointment"></table>-->
+<!--        <table tableName="tbl_registered" domainObjectName="Registered"></table>-->
 
         <!--未生成-->
 

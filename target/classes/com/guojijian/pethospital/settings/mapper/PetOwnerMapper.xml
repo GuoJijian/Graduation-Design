@@ -98,4 +98,18 @@
     INSERT INTO tbl_pet_owner(pid, p_user_name, p_call, p_password, p_phone, p_email, p_name, p_sex, p_type, p_breed, p_age,
     p_status, grade) VALUES(#{pid},#{pUserName},#{pCall},#{pPassword},#{pPhone},#{pEmail},#{pName},#{pSex},#{pType},#{pBreed},#{pAge},#{pStatus},#{grade})
   </insert>
+
+  <!--List<PetOwner> selectPetOwnerForFuzzyByPhone(String phone);-->
+  <select id="selectPetOwnerForFuzzyByPhone" resultMap="BaseResultMap">
+    SELECT p.pid, p.p_user_name, p.p_password, p.p_phone, p.p_email, p.p_name, d1.value p_type, d2.value p_breed,
+    p.p_age, p.p_status, p.grade
+    FROM tbl_pet_owner p
+    LEFT JOIN tbl_dic_value d1 ON d1.id=p.p_type
+    LEFT JOIN tbl_dic_value d2 ON d2.id=p.p_breed
+    <where>
+      <if test="phone!=null and phone!=''">
+        p.p_phone LIKE '%' #{phone} '%'
+      </if>
+    </where>
+  </select>
 </mapper>

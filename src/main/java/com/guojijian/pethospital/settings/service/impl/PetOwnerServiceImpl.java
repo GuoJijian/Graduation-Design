@@ -6,6 +6,8 @@ import com.guojijian.pethospital.settings.service.PetOwnerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service("petOwnerService")
 public class PetOwnerServiceImpl implements PetOwnerService {
 
@@ -20,5 +22,10 @@ public class PetOwnerServiceImpl implements PetOwnerService {
     @Override
     public PetOwner queryPetOwnerById(String id) {
         return petOwnerMapper.selectByPrimaryKey(id);
+    }
+
+    @Override
+    public List<PetOwner> queryPetOwnerForFuzzyByPhone(String phone) {
+        return petOwnerMapper.selectPetOwnerForFuzzyByPhone(phone);
     }
 }

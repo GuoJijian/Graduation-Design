@@ -40,4 +40,9 @@ public interface EmployeeService {
      * 根据条件分页查询医生
      */
     List<Employee> queryDoctorForPageByCondition(Map<String,Object> map);
+
+    /**
+     * 根据科室查询医生
+     */
+    List<Employee> queryDoctorByDepartment(String department);
 }

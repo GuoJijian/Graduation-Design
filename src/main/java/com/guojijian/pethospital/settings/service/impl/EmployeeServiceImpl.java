@@ -49,4 +49,9 @@ public class EmployeeServiceImpl implements EmployeeService {
     public List<Employee> queryDoctorForPageByCondition(Map<String, Object> map) {
         return employeeMapper.selectDoctorForPageByCondition(map);
     }
+
+    @Override
+    public List<Employee> queryDoctorByDepartment(String department) {
+        return employeeMapper.selectDoctorByDepartment(department);
+    }
 }
