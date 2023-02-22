@@ -6,9 +6,9 @@ import java.util.Date;
 
 //时间工具类
 public class DateUtils {
-    //转换格式：yyyy-MM-dd HH-mm-ss
+    //转换格式：yyyy-MM-dd HH:mm:ss
     public static String dateFormatDateTime(Date date){
-        SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
+        SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         return sdf.format(date);
     }
 

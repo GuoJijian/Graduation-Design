@@ -43,4 +43,9 @@ public class RegisteredServiceImpl implements RegisteredService {
     public Registered queryRegisteredToDeatilById(String id) {
         return registeredMapper.selectRegisteredToDetailById(id);
     }
+
+    @Override
+    public List<Registered> queryRegisteredToTreatmentByPhone(String phone) {
+        return registeredMapper.selectRegisteredToTreatmentByPhone(phone);
+    }
 }

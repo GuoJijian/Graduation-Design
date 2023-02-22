@@ -64,4 +64,5 @@ public interface DrugsMapper {
      * 根据ids批量删除药品信息
      */
     int deleteDrugsByIds(String[] ids);
+
 }

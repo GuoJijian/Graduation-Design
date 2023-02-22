@@ -34,4 +34,14 @@ public class DrugsServiceImpl implements DrugsService {
     public int dropDrugsByIds(String[] ids) {
         return drugsMapper.deleteDrugsByIds(ids);
     }
+
+    @Override
+    public Drugs queryDrugsById(String id) {
+        return drugsMapper.selectByPrimaryKey(id);
+    }
+
+    @Override
+    public List<Drugs> queryDrugsAll() {
+        return drugsMapper.selectAll();
+    }
 }

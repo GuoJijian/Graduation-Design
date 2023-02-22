@@ -46,6 +46,7 @@
 <!--        <table tableName="tbl_appointment" domainObjectName="Appointment"></table>-->
 <!--        <table tableName="tbl_registered" domainObjectName="Registered"></table>-->
 <!--        <table tableName="tbl_drugs" domainObjectName="Drugs"></table>-->
+<!--        <table tableName="tbl_treatment" domainObjectName="Treatment"></table>-->
 
         <!--未生成-->
 

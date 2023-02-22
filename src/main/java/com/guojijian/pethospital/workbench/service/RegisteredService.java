@@ -35,4 +35,9 @@ public interface RegisteredService {
      * 根据id查询挂号信息的详情
      */
     Registered queryRegisteredToDeatilById(String id);
+
+    /**
+     * 根据电话号码模糊查询挂号信息至诊疗页面
+     */
+    List<Registered> queryRegisteredToTreatmentByPhone(String phone);
 }

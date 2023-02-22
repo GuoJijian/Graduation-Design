@@ -149,4 +149,19 @@
     JOIN tbl_employee e2 ON e2.eid=r.doctor
     WHERE r.rid=#{id}
   </select>
+
+  <!--List<Registered> selectRegisteredToTreatmentByPhone(String phone);-->
+  <select id="selectRegisteredToTreatmentByPhone" resultMap="BaseResultMap">
+    SELECT r.rid, r.r_date, r.r_department, r.r_price, p.p_user_name pid, r.p_phone, r.p_name, d1.value p_type,
+    d2.value p_breed, r.eid, r.doctor
+    FROM tbl_registered r
+    JOIN tbl_pet_owner p ON p.pid=r.pid
+    JOIN tbl_dic_value d1 ON d1.id=r.p_type
+    JOIN tbl_dic_value d2 ON d2.id=r.p_breed
+    <where>
+      <if test="phone!=null and phone!=''">
+        r.p_phone LIKE '%' #{phone} '%'
+      </if>
+    </where>
+  </select>
 </mapper>

@@ -25,4 +25,14 @@ public interface DrugsService {
      * 根据ids批量删除药品信息
      */
     int dropDrugsByIds(String[] ids);
+
+    /**
+     * 根据id查询药品信息
+     */
+    Drugs queryDrugsById(String id);
+
+    /**
+     * 查询所有的药品信息
+     */
+    List<Drugs> queryDrugsAll();
 }

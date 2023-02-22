@@ -1,6 +1,7 @@
 package com.guojijian.pethospital.workbench.mapper;
 
 import com.guojijian.pethospital.workbench.pojo.Registered;
+
 import java.util.List;
 import java.util.Map;
 
@@ -74,4 +75,9 @@ public interface RegisteredMapper {
      * 根据id查询挂号信息详情
      */
     Registered selectRegisteredToDetailById(String id);
+
+    /**
+     * 根据电话号码模糊查询挂号信息至诊疗页面
+     */
+    List<Registered> selectRegisteredToTreatmentByPhone(String phone);
 }
