@@ -45,6 +45,7 @@
 <!--        <table tableName="tbl_info_comment" domainObjectName="InfoComment"></table>-->
 <!--        <table tableName="tbl_appointment" domainObjectName="Appointment"></table>-->
 <!--        <table tableName="tbl_registered" domainObjectName="Registered"></table>-->
+<!--        <table tableName="tbl_drugs" domainObjectName="Drugs"></table>-->
 
         <!--未生成-->
 
