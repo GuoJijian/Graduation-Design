@@ -47,6 +47,8 @@
 <!--        <table tableName="tbl_registered" domainObjectName="Registered"></table>-->
 <!--        <table tableName="tbl_drugs" domainObjectName="Drugs"></table>-->
 <!--        <table tableName="tbl_treatment" domainObjectName="Treatment"></table>-->
+<!--        <table tableName="tbl_beauty" domainObjectName="Beauty"></table>-->
+<!--        <table tableName="tbl_hospital" domainObjectName="Hospital"></table>-->
 
         <!--未生成-->
 

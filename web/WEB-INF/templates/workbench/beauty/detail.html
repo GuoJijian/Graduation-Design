@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+
+<link th:href="@{/static/jquery/bootstrap_3.3.0/css/bootstrap.min.css}" type="text/css" rel="stylesheet" />
+
+<style type="text/css">
+.mystage{
+	font-size: 20px;
+	vertical-align: middle;
+	cursor: pointer;
+}
+.closingDate{
+	font-size : 15px;
+	cursor: pointer;
+	vertical-align: middle;
+}
+</style>
+	
+<script type="text/javascript" th:src="@{/static/jquery/jquery-1.11.1-min.js}"></script>
+<script type="text/javascript" th:src="@{/static/jquery/bootstrap_3.3.0/js/bootstrap.min.js}"></script>
+
+<script type="text/javascript">
+
+	$(function(){
+
+	});
+	
+	
+	
+</script>
+
+</head>
+<body>
+	
+	<!-- 返回按钮 -->
+	<div style="position: relative; top: 35px; left: 10px;">
+		<a href="javascript:void(0);" onclick="window.history.back();"><span class="glyphicon glyphicon-arrow-left" style="font-size: 20px; color: #DDDDDD"></span></a>
+	</div>
+	
+	<!-- 大标题 -->
+	<div style="position: relative; left: 40px; top: -30px;">
+		<div class="page-header">
+			<h3 th:text="${beauty.eid}">动力节点-交易01</h3>
+		</div>
+		<div style="position: relative; height: 50px; width: 500px;  top: -72px; left: 700px;">
+			<button type="button" class="btn btn-default" onclick="window.location.href='convert.html';"><span class="glyphicon glyphicon-retweet"></span> 转换</button>
+		</div>
+	</div>
+
+	<br/>
+	<br/>
+	<br/>
+
+	<!-- 详细信息 -->
+	<div style="position: relative; top: 0px;">
+		<div style="position: relative; left: 40px; height: 30px;">
+			<div style="width: 300px; color: gray;">医生名称</div>
+			<div style="width: 300px;position: relative; left: 200px; top: -20px;"><b th:text="${beauty.eid}">zhangsan</b></div>
+			<div style="width: 300px;position: relative; left: 450px; top: -40px; color: gray;">美容种类</div>
+			<div style="width: 300px;position: relative; left: 650px; top: -60px;"><b th:text="${beauty.tDisease}">5,000</b></div>
+			<div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -60px;"></div>
+			<div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -60px; left: 450px;"></div>
+		</div>
+		<div style="position: relative; left: 40px; height: 30px; top: 10px;">
+			<div style="width: 300px; color: gray;">美容时间</div>
+			<div style="width: 300px;position: relative; left: 200px; top: -20px;"><b th:text="${beauty.tTime}">动力节点-交易01</b></div>
+			<div style="width: 300px;position: relative; left: 450px; top: -40px; color: gray;">美容费</div>
+			<div style="width: 300px;position: relative; left: 650px; top: -60px;"><b th:text="${beauty.tPrice}">2017-02-07</b></div>
+			<div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -60px;"></div>
+			<div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -60px; left: 450px;"></div>
+		</div>
+		<div style="position: relative; left: 40px; height: 30px; top: 90px;">
+			<div style="width: 300px; color: gray;">美容处理</div>
+			<div style="width: 630px;position: relative; left: 200px; top: -20px;">
+				<b th:text="${beauty.tHandle}">
+					&nbsp;
+				</b>
+			</div>
+			<div style="height: 1px; width: 850px; background: #D5D5D5; position: relative; top: -20px;"></div>
+		</div>
+		<div style="position: relative; left: 40px; height: 30px; top: 90px;">
+			<div style="width: 300px; color: gray;">医嘱</div>
+			<div style="width: 630px;position: relative; left: 200px; top: -20px;">
+				<b th:text="${beauty.tAdvice}">
+					&nbsp;
+				</b>
+			</div>
+			<div style="height: 1px; width: 850px; background: #D5D5D5; position: relative; top: -20px;"></div>
+		</div>
+	</div>
+
+	<!-- 关联挂号 -->
+	<div>
+		<div style="position: relative; top: 100px; left: 40px;">
+			<div class="page-header">
+				<h4>关联挂号信息</h4>
+			</div>
+			<div style="position: relative;top: 0px;">
+				<table id="registeredTable" class="table table-hover" style="width: 900px;">
+					<thead>
+						<tr style="color: #B3B3B3;">
+							<td>用户名称</td>
+							<td>联系电话</td>
+							<td>宠物类型</td>
+							<td>宠物品种</td>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td th:text="${registered.pid}">资质审查</td>
+							<td th:text="${registered.pPhone}">5,000</td>
+							<td th:text="${registered.pType}">2017-02-07</td>
+							<td th:text="${registered.pBreed}">2016-10-10 10:10:10</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			
+		</div>
+	</div>
+	
+	<div style="height: 200px;"></div>
+	
+</body>
+</html>
