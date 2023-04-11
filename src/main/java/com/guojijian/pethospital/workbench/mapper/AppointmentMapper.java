@@ -2,6 +2,7 @@ package com.guojijian.pethospital.workbench.mapper;
 
 import com.guojijian.pethospital.workbench.pojo.Appointment;
 import java.util.List;
+import java.util.Map;
 
 public interface AppointmentMapper {
     /**
@@ -58,4 +59,9 @@ public interface AppointmentMapper {
      * 根据id修改预约状态
      */
     int updateAppointmentStatusById(Appointment appointment);
+
+    /**
+     * 根据条件分页查询预约信息
+     */
+    List<Appointment> selectAppointmentForPageByCondition(Map<String,Object> map);
 }

@@ -38,7 +38,7 @@ public class BeautyController {
 
     @RequestMapping("/workbench/beauty/toIndex")
     public String toIndex(Model model){
-        List<DicValue> diseaseList=dicValueService.queryDivValueByTypeCode("beautyDisease");
+        List<DicValue> diseaseList=dicValueService.queryDicValueByTypeCode("beautyDisease");
         model.addAttribute("diseaseList",diseaseList);
 
         return "/workbench/beauty/index";

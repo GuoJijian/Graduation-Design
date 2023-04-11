@@ -38,7 +38,7 @@ public class RegisteredController {
 
     @RequestMapping("/workbench/registered/toIndex")
     public String toIndex(Model model){
-        List<DicValue> departmentList=dicValueService.queryDivValueByTypeCode("department");
+        List<DicValue> departmentList=dicValueService.queryDicValueByTypeCode("department");
         //将查询结果保存到request作用域中
         model.addAttribute("departmentList",departmentList);
 
@@ -47,12 +47,13 @@ public class RegisteredController {
 
     @RequestMapping("/workbench/registered/queryRegisteredForPageByCondition")
     @ResponseBody
-    public Object queryRegisteredForPageByCondition(String department,String phone,String date,Integer pageSize,Integer pageNum){
+    public Object queryRegisteredForPageByCondition(String department,String phone,String startDate,String endDate,Integer pageSize,Integer pageNum){
         //封装参数
         Map<String,Object> map=new HashMap<>();
         map.put("department",department);
         map.put("phone",phone);
-        map.put("date",date);
+        map.put("startDate",startDate);
+        map.put("endDate",endDate);
         //分页查询
         PageHelper.startPage(pageNum,pageSize);
         List<Registered> registeredList=registeredService.queryRegisteredForPageByCondition(map);

@@ -8,7 +8,7 @@ public interface DicValueService {
     /**
      * 根据typeCode查询DicValue
      */
-    List<DicValue> queryDivValueByTypeCode(String typeCode);
+    List<DicValue> queryDicValueByTypeCode(String typeCode);
 
     /**
      * 根据id查询Value

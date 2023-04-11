@@ -5,14 +5,18 @@ import com.github.pagehelper.PageInfo;
 import com.guojijian.pethospital.commons.contants.Contants;
 import com.guojijian.pethospital.commons.pojo.ReturnObject;
 import com.guojijian.pethospital.commons.utils.UUIDUtils;
+import com.guojijian.pethospital.settings.pojo.DicValue;
 import com.guojijian.pethospital.settings.pojo.Employee;
 import com.guojijian.pethospital.settings.pojo.PetOwner;
+import com.guojijian.pethospital.settings.service.DicValueService;
 import com.guojijian.pethospital.settings.service.EmployeeService;
+import com.guojijian.pethospital.settings.service.PetOwnerService;
 import com.guojijian.pethospital.workbench.pojo.Appointment;
 import com.guojijian.pethospital.workbench.service.AppointmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -28,12 +32,22 @@ public class AppointmentController {
     private EmployeeService employeeService;
     @Autowired
     private AppointmentService appointmentService;
+    @Autowired
+    private PetOwnerService petOwnerService;
+    @Autowired
+    private DicValueService dicValueService;
 
     @RequestMapping("/workbench/appointment/toIndex")
     public String toIndex(HttpSession session, Model model){
         //获取用户id
         PetOwner p=(PetOwner) session.getAttribute(Contants.SESSION_USER);
+        List<DicValue> positionList=dicValueService.queryDicValueByTypeCode("position");
+        List<DicValue> departmentList=dicValueService.queryDicValueByTypeCode("department");
+        List<DicValue> odTypeList=dicValueService.queryDicValueByTypeCode("odType");
         model.addAttribute("userId",p.getPid());
+        model.addAttribute("positionList",positionList);
+        model.addAttribute("departmentList",departmentList);
+        model.addAttribute("odTypeList",odTypeList);
 
         return "workbench/appointment/index";
     }
@@ -103,6 +117,21 @@ public class AppointmentController {
         return ro;
     }
 
+    @RequestMapping("/workbench/appointment/isHasAppointment")
+    @ResponseBody
+    public Object isHasAppointment(String userId){
+        ReturnObject ro=new ReturnObject();
+        //查询预约
+        Appointment appointment=appointmentService.queryAppointmentByUserId(userId);
+        if(appointment!=null){
+            ro.setCode(Contants.RETURN_OBJECT_CODE_SUCCESS);
+        }else{
+            ro.setCode(Contants.RETURN_OBJECT_CODE_FAIL);
+        }
+
+        return ro;
+    }
+
     @RequestMapping("/workbench/appointment/cancelAppointmentById")
     @ResponseBody
     public Object cancelAppointmentById(Appointment appointment){
@@ -125,5 +154,46 @@ public class AppointmentController {
         }
 
         return ro;
+    }
+
+    @RequestMapping("/workbench/appointment/toOnlyQuery")
+    public String toOnlyQuery(Model model){
+        List<DicValue> departmentList = dicValueService.queryDicValueByTypeCode("department");
+        model.addAttribute("departmentList",departmentList);
+        return "workbench/appointment/onlyQuery";
+    }
+
+    @RequestMapping("/workbench/appointment/queryAppointmentForPageByCondition")
+    @ResponseBody
+    public Object queryAppointmentForPageByCondition(String name,String department,String startDate,String endDate,Integer pageNum,Integer pageSize){
+        Map<String,Object> map=new HashMap<>();
+        map.put("name",name);
+        map.put("department",department);
+        map.put("startDate",startDate);
+        map.put("endDate",endDate);
+        //分页查询
+        PageHelper.startPage(pageNum,pageSize);
+        List<Appointment> appointmentList=appointmentService.queryAppointmentForPageByCondition(map);
+        //封装appointment对象，便于前端页面显示
+        PetOwner petOwner=null;
+        Employee doctor=null;
+        if(appointmentList.size()>0){
+            for(Appointment appointment :appointmentList){
+                petOwner=petOwnerService.queryPetOwnerById(appointment.getPid());
+                doctor=employeeService.queryEmployeeById(appointment.getEid());
+                appointment.setName(petOwner.getpUserName());
+                appointment.setType(dicValueService.queryValueById(petOwner.getpType()));
+                appointment.setBreed(dicValueService.queryValueById(petOwner.getpBreed()));
+                appointment.setEid(dicValueService.queryValueById(doctor.geteDepartment()));
+            }
+        }
+
+        PageInfo<Appointment> page=new PageInfo<>(appointmentList,5);
+        //封装查询结果，返回响应信息
+        Map<String,Object> resultMap=new HashMap<>();
+        resultMap.put("appointmentList",appointmentList);
+        resultMap.put("page",page);
+
+        return resultMap;
     }
 }

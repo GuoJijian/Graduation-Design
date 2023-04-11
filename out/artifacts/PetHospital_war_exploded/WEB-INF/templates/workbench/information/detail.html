@@ -222,7 +222,7 @@
 		
 		<!-- 评论1 -->
 		<div :id="'div_'+infoComment.id" class="remarkDiv" style="height: 60px;" v-for="infoComment in infoCommentList">
-			<img :title="infoComment.createBy" src="../../image/user-thumbnail.png" style="width: 30px; height:30px;">
+			<img :title="infoComment.createBy" style="width: 30px; height:30px;">
 			<div style="position: relative; top: -40px; left: 40px;" >
 				<h5>{{infoComment.noteContent}}</h5>
 				<font color="gray">信息</font> <font color="gray">-</font> <b>{{title}}</b> <small style="color: gray;"> {{infoComment.createDate}} 由{{infoComment.createBy}}创建</small>

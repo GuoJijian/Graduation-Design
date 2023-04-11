@@ -76,6 +76,7 @@ public class UserController {
             if(obj instanceof PetOwner){
                 petOwner=(PetOwner)obj;
                 ro.setCode(Contants.RETURN_OBJECT_CODE_SUCCESS);
+                ro.setRetObject("/workbench/information/toIndex");
                 session.setAttribute(Contants.SESSION_USER,petOwner);
             }else{
                 Employee e=(Employee) obj;
@@ -94,6 +95,15 @@ public class UserController {
                     return ro;
                 }else{
                     ro.setCode(Contants.RETURN_OBJECT_CODE_SUCCESS);
+                    //根据权限，封装首页地址
+                    if("2".equals(e.getGrade())){
+                        ro.setRetObject("/workbench/appointment/toOnlyQuery");
+                    }else if ("3".equals(e.getGrade())){
+                        ro.setRetObject("/workbench/treatment/toIndex");
+                    }else{
+                        ro.setRetObject("/workbench/information/toOperate");
+                    }
+
                     session.setAttribute(Contants.SESSION_USER,e);
                 }
 
@@ -123,9 +133,9 @@ public class UserController {
 
     @RequestMapping("/settings/qx/user/toRegister")
     public String toRegister(Model model){
-        List<DicValue> callList=dicValueService.queryDivValueByTypeCode("call");
-        List<DicValue> petTypeList=dicValueService.queryDivValueByTypeCode("petType");
-        List<DicValue> petBreedList=dicValueService.queryDivValueByTypeCode("petBreed");
+        List<DicValue> callList=dicValueService.queryDicValueByTypeCode("call");
+        List<DicValue> petTypeList=dicValueService.queryDicValueByTypeCode("petType");
+        List<DicValue> petBreedList=dicValueService.queryDicValueByTypeCode("petBreed");
         //封装查询结果
         model.addAttribute("callList",callList);
         model.addAttribute("petTypeList",petTypeList);

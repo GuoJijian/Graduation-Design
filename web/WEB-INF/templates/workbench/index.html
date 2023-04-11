@@ -31,7 +31,7 @@
 			$(this).children("a").css("color","white");
 		});
 
-		window.open("/workbench/information/toIndex","workareaFrame");
+		window.open($("#top").attr("index"),"workareaFrame");
 
 		//给退出标签添加单击事件
 		$("#loginOutA").click(function () {
@@ -114,13 +114,13 @@
 	</div>
 	
 	<!-- 顶部 -->
-	<div id="top" style="height: 50px; background-color: #3C3C3C; width: 100%;">
+	<div id="top" style="height: 50px; background-color: #3C3C3C; width: 100%;" th:index="${index}">
 		<div style="position: absolute; top: 5px; left: 0px; font-size: 30px; font-weight: 400; color: white; font-family: 'times new roman'">宠物医院管理系统 &nbsp;<span style="font-size: 12px;">&copy;2023&nbsp;GJJ</span></div>
 		<div style="position: absolute; top: 15px; right: 15px;">
 			<ul>
 				<li class="dropdown user-dropdown">
 					<a href="javascript:void(0)" style="text-decoration: none; color: white;" class="dropdown-toggle" data-toggle="dropdown">
-						<span class="glyphicon glyphicon-user"></span> <span  th:text="${session.user.grade>'1' ? session.user.eUserName : session.user.pUserName}">zhangsan</span> <span class="caret"></span>
+						<span class="glyphicon glyphicon-user"></span> <span th:text="${session.user.grade>'1' ? session.user.eUserName : session.user.pUserName}">zhangsan</span> <span class="caret"></span>
 					</a>
 					<ul class="dropdown-menu">
 						<li><a th:href="@{/settings/qx/user/toDetail}"> <span class="glyphicon glyphicon-file"></span> 我的资料</a></li>
@@ -139,16 +139,16 @@
 		<div id="navigation" style="left: 0px; width: 18%; position: relative; height: 100%; overflow:auto;">
 		
 			<ul id="no1" class="nav nav-pills nav-stacked">
-				<li class="liClass"><a th:href="@{/workbench/information/toIndex}" target="workareaFrame"><span class="glyphicon glyphicon-home"></span> 信息浏览</a></li>
-				<li class="liClass"><a th:href="@{/workbench/appointment/toIndex}" target="workareaFrame"><span class="glyphicon glyphicon-tag"></span> 预约管理</a></li>
-				<li class="liClass"><a th:href="@{/workbench/appointment/toIndex}" target="workareaFrame"><span class="glyphicon glyphicon-tag"></span> 查看预约</a></li>
-				<li class="liClass"><a th:href="@{/workbench/registered/toIndex}" target="workareaFrame"><span class="glyphicon glyphicon-time"></span> 宠物挂号管理</a></li>
-				<li class="liClass"><a th:href="@{/workbench/appointment/toIndex}" target="workareaFrame"><span class="glyphicon glyphicon-user"></span> 宠物寄养管理</a></li>
-				<li class="liClass"><a th:href="@{/workbench/treatment/toIndex}" target="workareaFrame"><span class="glyphicon glyphicon-earphone"></span> 宠物诊疗管理</a></li>
-				<li class="liClass"><a th:href="@{/workbench/beauty/toIndex}" target="workareaFrame"><span class="glyphicon glyphicon-play-circle"></span> 宠物美容管理</a></li>
-				<li class="liClass"><a th:href="@{/workbench/hospital/toIndex}" target="workareaFrame"><span class="glyphicon glyphicon-search"></span> 宠物住院管理</a></li>
+				<li th:if="${session.user.grade}=='1'" class="liClass"><a th:href="@{/workbench/information/toIndex}" target="workareaFrame"><span class="glyphicon glyphicon-home"></span> 信息浏览</a></li>
+				<li th:if="${session.user.grade}=='1'" class="liClass"><a th:href="@{/workbench/appointment/toIndex}" target="workareaFrame"><span class="glyphicon glyphicon-tag"></span> 预约管理</a></li>
+				<li th:if="${session.user.grade}=='2'" class="liClass"><a th:href="@{/workbench/appointment/toOnlyQuery}" target="workareaFrame"><span class="glyphicon glyphicon-tag"></span> 查看预约</a></li>
+				<li th:if="${session.user.grade}=='2'" class="liClass"><a th:href="@{/workbench/registered/toIndex}" target="workareaFrame"><span class="glyphicon glyphicon-time"></span> 宠物挂号管理</a></li>
+				<li th:if="${session.user.grade}=='2'" class="liClass"><a th:href="@{/workbench/foster/toIndex}" target="workareaFrame"><span class="glyphicon glyphicon-user"></span> 宠物寄养管理</a></li>
+				<li th:if="${session.user.grade}=='3'" class="liClass"><a th:href="@{/workbench/treatment/toIndex}" target="workareaFrame"><span class="glyphicon glyphicon-earphone"></span> 宠物诊疗管理</a></li>
+				<li th:if="${session.user.grade}=='3'" class="liClass"><a th:href="@{/workbench/beauty/toIndex}" target="workareaFrame"><span class="glyphicon glyphicon-play-circle"></span> 宠物美容管理</a></li>
+				<li th:if="${session.user.grade}=='3'" class="liClass"><a th:href="@{/workbench/hospital/toIndex}" target="workareaFrame"><span class="glyphicon glyphicon-search"></span> 宠物住院管理</a></li>
 
-				<li class="liClass">
+				<li th:if="${session.user.grade}=='4'" class="liClass">
 					<a href="#no3" class="collapsed" data-toggle="collapse"><span class="glyphicon glyphicon-stats"></span> 信息管理</a>
 					<ul id="no3" class="nav nav-pills nav-stacked collapse">
 						<li class="liClass"><a th:href="@{/workbench/information/toOperate}" target="workareaFrame">&nbsp;&nbsp;&nbsp;<span class="glyphicon glyphicon-chevron-right"></span> 信息管理</a></li>

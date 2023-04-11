@@ -30,7 +30,7 @@
 					})
 					.then(function (value) {
 						if(value.data.code=="1"){
-							window.location.href="/workbench/toIndex";
+							window.location.href="/workbench/toIndex?index="+value.data.retObject;
 						}else{
 							$("#msg").text(value.data.message);
 						}

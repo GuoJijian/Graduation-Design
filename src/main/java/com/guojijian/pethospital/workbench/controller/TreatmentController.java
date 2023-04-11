@@ -46,7 +46,7 @@ public class TreatmentController {
 
     @RequestMapping("/workbench/treatment/toIndex")
     public String toIndex(Model model){
-        List<DicValue> diseaseList=dicValueService.queryDivValueByTypeCode("disease");
+        List<DicValue> diseaseList=dicValueService.queryDicValueByTypeCode("disease");
         List<Drugs> drugsList=drugsService.queryDrugsAll();
         model.addAttribute("diseaseList",diseaseList);
         model.addAttribute("drugsList",drugsList);

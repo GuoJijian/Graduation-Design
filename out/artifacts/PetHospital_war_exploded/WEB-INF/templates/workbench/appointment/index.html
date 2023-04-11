@@ -68,7 +68,22 @@
 						vue.page=value.data.page;
 
 						//根据用户查询预约记录，判断是否存在预约记录
-						vue.queryAppointmentByUserId();
+						vue.isHasAppointment();
+					});
+				},
+				isHasAppointment:function(){
+					axios({
+						url:'/workbench/appointment/isHasAppointment',
+						method:'post',
+						params:{
+							userId:this.userId
+						}
+					})
+					.then(function (value) {
+						if(value.data.code=="1"){
+							//刷新预约列表
+							$("#doctorListTbody button").attr("class","btn btn-default disabled");
+						}
 					});
 				},
 				createAppointment:function () {
@@ -85,6 +100,8 @@
 						if(value.data.code=="1"){
 							//刷新预约列表
 							$("#doctorListTbody button").attr("class","btn btn-default disabled");
+							//刷新预约记录按钮状态
+							$("#checkAppointmentTbody button").attr("class","btn btn-danger");
 							//关闭创建预约的模态窗口
 							$("#createAppointmentModal").modal("hide");
 							//提示
@@ -104,11 +121,12 @@
 					})
 					.then(function (value) {
 						if(value.data.code=="1"){
-							vue.appointment=value.data;
-							if(vue.appointment!=null){
-								//刷新预约列表
-								$("#doctorListTbody button").attr("class","btn btn-default disabled");
-							}
+							vue.appointment=value.data.retObject;
+
+							//显示预约记录的模态窗口
+							$("#checkAppointmentModal").modal("show");
+						}else{
+							alert(value.data.message);
 						}
 					});
 				},
@@ -123,7 +141,7 @@
 					.then(function (value) {
 						if(value.data.code=="1"){
 							//刷新预约记录列表
-							$("#checkAppointmentTbody td[status='status']").text("已取消");
+							vue.appointment.aStatus="已取消";
 							$("#checkAppointmentTbody button").attr("class","btn btn-danger disabled");
 							//刷新预约列表
 							$("#doctorListTbody button").attr("class","btn btn-default");
@@ -167,11 +185,11 @@
 
 		//给我的预约按钮添加单击事件
 		$("#checkAppointmentBtn").click(function () {
-			//验证
+			//初始化预约记录列表
+			vue.appointment="";
+
 			//查询预约记录
 			vue.queryAppointmentByUserId();
-			//显示预约记录的模态窗口
-			$("#checkAppointmentModal").modal("show");
 		});
 
 		//给取消按钮添加单击事件
@@ -229,6 +247,32 @@
 			//刷新信息列表
 			vue.queryDoctorForPageByCondition();
 		});
+
+		//解决日历显示乱码
+		$.fn.datetimepicker.dates['zh-CN'] = {
+			days: ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日"],
+			daysShort: ["周日", "周一", "周二", "周三", "周四", "周五", "周六", "周日"],
+			daysMin:  ["日", "一", "二", "三", "四", "五", "六", "日"],
+			months: ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"],
+			monthsShort: ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"],
+			today: "今天",
+			clear:"清空",
+			suffix: [],
+			meridiem: ["上午", "下午"]
+		};
+		//调用日历工具函数
+		$(".editDate").datetimepicker({
+			language:'zh-CN',//语言
+			format:'yyyy-mm-dd',//日期格式
+			minView:'month',//可选择的最小视图
+			initialDate:new Date(),//初始化时显示的日期
+			autoclose:true,//设置选择完日期后，自动关闭日历
+			todayBtn:true,//设置是否显示“今天”按钮
+			clearBtn:true//设置是否显示“清除”按钮
+		}).on('changeDate',function (event) {
+			//当时间改变时为vue的属性赋值
+			vue.createDate=$("#create-date").val();
+		});
 	});
 	
 </script>
@@ -273,7 +317,7 @@
 						<div class="form-group">
 							<label for="create-date" class="col-sm-2 control-label">预约时间<span style="font-size: 15px; color: red;">*</span></label>
 							<div class="col-sm-10" style="width: 300px;">
-								<input type="text" class="form-control" id="create-date" v-model="createDate">
+								<input type="text" class="editDate form-control" id="create-date">
 							</div>
 						</div>
 					</form>
@@ -313,7 +357,7 @@
 							<tr>
 								<td>{{appointment.aDate}}</td>
 								<td>{{appointment.eid}}</td>
-								<td status="status">{{appointment.aStatus}}</td>
+								<td>{{appointment.aStatus}}</td>
 								<td><button v-if="appointment.aid!=''" :value="appointment.aid" type="button" class="btn btn-danger"><span class="glyphicon glyphicon-minus"></span> 取消</button></td>
 								<td></td>
 							</tr>
@@ -351,7 +395,10 @@
 				  <div class="form-group">
 				    <div class="input-group">
 				      <div class="input-group-addon">职称</div>
-				      <input class="form-control" type="text" v-model="position">
+					  <select class="form-control" id="edit-position" v-model="position">
+						  <option></option>
+						  <option th:each="position : ${positionList}" th:value="${position.id}" th:text="${position.value}">试图联系</option>
+					  </select>
 				    </div>
 				  </div>
 
@@ -359,17 +406,23 @@
 				  <div class="form-group">
 				    <div class="input-group">
 				      <div class="input-group-addon">所属科室</div>
-					  <input class="form-control" type="text" id="departmentInput" v-model="department"/>
+					  <select class="form-control" id="departmentInput" v-model="department">
+						  <option></option>
+						  <option th:each="department : ${departmentList}" th:value="${department.id}" th:text="${department.value}">广告</option>
+					  </select>
 				    </div>
 				  </div>
 				  <div class="form-group">
 				    <div class="input-group">
-				      <div class="input-group-addon">结束日期</div>
-					  <input class="form-control" type="text" id="odTypeInput" v-model="odType">
+				      <div class="input-group-addon">排班</div>
+						<select class="form-control" id="odType" v-model="odType">
+							<option></option>
+							<option th:each="odType : ${odTypeList}" th:value="${odType.id}" th:text="${odType.value}">广告</option>
+						</select>
 				    </div>
 				  </div>
 				  
-				  <button type="submit" class="btn btn-default">查询</button>
+				  <button @click="queryDoctorForPageByCondition()" type="button" class="btn btn-default">查询</button>
 				  
 				</form>
 			</div>

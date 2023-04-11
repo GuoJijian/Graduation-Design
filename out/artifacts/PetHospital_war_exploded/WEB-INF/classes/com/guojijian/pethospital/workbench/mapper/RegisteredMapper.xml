@@ -100,8 +100,11 @@
       <if test="phone!=null and phone!=''">
         AND r.p_phone=#{phone}
       </if>
-      <if test="date!=null and date!=''">
-        AND r.r_date=#{date}
+      <if test="startDate!=null and startDate!=''">
+        AND r.r_date>=#{startDate}
+      </if>
+      <if test="endDate!=null and endDate!=''">
+        AND #{endDate}>=r.r_date
       </if>
     </where>
   </select>

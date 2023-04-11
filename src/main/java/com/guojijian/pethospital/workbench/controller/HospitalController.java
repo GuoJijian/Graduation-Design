@@ -39,7 +39,7 @@ public class HospitalController {
     @RequestMapping("/workbench/hospital/toIndex")
     public String toIndex(Model model){
         //查询页面所需数据
-        List<DicValue> addressList=dicValueService.queryDivValueByTypeCode("address");
+        List<DicValue> addressList=dicValueService.queryDicValueByTypeCode("address");
         //将查询结果封装到request域对象中
         model.addAttribute("addressList",addressList);
 

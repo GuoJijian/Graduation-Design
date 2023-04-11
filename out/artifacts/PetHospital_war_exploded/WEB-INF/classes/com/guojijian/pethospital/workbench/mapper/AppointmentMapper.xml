@@ -87,4 +87,27 @@
     SET a_status=#{aStatus}
     WHERE aid=#{aid}
   </update>
+
+  <!--List<Appointment> selectAppointmentForPageByCondition(Map<String,Object> map);-->
+  <select id="selectAppointmentForPageByCondition" resultMap="BaseResultMap">
+    SELECT a.aid, a.a_date, a.pid, a.eid
+    FROM tbl_appointment a
+    JOIN tbl_pet_owner p ON p.pid=a.pid
+    JOIN tbl_employee e ON e.eid=a.eid
+    <where>
+      a.a_status="1"
+      <if test="name!=null and name!=''">
+        AND p.p_user_name LIKE '%' #{name} '%'
+      </if>
+      <if test="department!=null and department!=''">
+        AND e.e_department=#{department}
+      </if>
+      <if test="startDate!=null and startDate!=''">
+        AND a.a_date>=#{startDate}
+      </if>
+      <if test="endDate!=null and endDate!=''">
+        AND #{endDate}>=a.a_date
+      </if>
+    </where>
+  </select>
 </mapper>

@@ -1,4 +1,7 @@
 package com.guojijian.pethospital.commons.pojo;
+
+import com.guojijian.pethospital.commons.contants.Contants;
+
 //公共返回类，用于存储异步请求的响应数据
 public class ReturnObject {
     private String code;
@@ -32,4 +35,10 @@ public class ReturnObject {
         this.retObject = retObject;
     }
 
+    public static ReturnObject success(Object object){
+        ReturnObject ro=new ReturnObject();
+        ro.code=Contants.RETURN_OBJECT_CODE_SUCCESS;
+        ro.retObject=object;
+        return ro;
+    }
 }

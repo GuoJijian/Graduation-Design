@@ -6,6 +6,9 @@ import com.guojijian.pethospital.workbench.service.AppointmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Map;
+
 @Service("appointmentService")
 public class AppointmentServiceImpl implements AppointmentService {
     @Autowired
@@ -24,5 +27,10 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     public int alterAppointmentStatusById(Appointment appointment) {
         return appointmentMapper.updateAppointmentStatusById(appointment);
+    }
+
+    @Override
+    public List<Appointment> queryAppointmentForPageByCondition(Map<String, Object> map) {
+        return appointmentMapper.selectAppointmentForPageByCondition(map);
     }
 }

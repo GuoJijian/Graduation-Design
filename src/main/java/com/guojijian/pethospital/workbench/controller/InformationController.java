@@ -46,7 +46,7 @@ public class InformationController {
     @RequestMapping("/workbench/information/toIndex")
     public String toIndex(Model model){
         //查询下拉框数据
-        List<DicValue> infoTypeList=dicValueService.queryDivValueByTypeCode("infoType");
+        List<DicValue> infoTypeList=dicValueService.queryDicValueByTypeCode("infoType");
         model.addAttribute("infoTypeList",infoTypeList);
 
         return "workbench/information/index";
@@ -55,7 +55,7 @@ public class InformationController {
     @RequestMapping("/workbench/information/toOperate")
     public String toOperate(Model model){
         //查询下拉框数据
-        List<DicValue> infoTypeList=dicValueService.queryDivValueByTypeCode("infoType");
+        List<DicValue> infoTypeList=dicValueService.queryDicValueByTypeCode("infoType");
         model.addAttribute("infoTypeList",infoTypeList);
 
         return "workbench/information/operate";

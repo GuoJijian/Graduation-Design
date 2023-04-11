@@ -49,8 +49,10 @@
 <!--        <table tableName="tbl_treatment" domainObjectName="Treatment"></table>-->
 <!--        <table tableName="tbl_beauty" domainObjectName="Beauty"></table>-->
 <!--        <table tableName="tbl_hospital" domainObjectName="Hospital"></table>-->
+<!--        <table tableName="tbl_foster" domainObjectName="Foster"></table>-->
 
         <!--未生成-->
+
 
     </context>
 </generatorConfiguration>

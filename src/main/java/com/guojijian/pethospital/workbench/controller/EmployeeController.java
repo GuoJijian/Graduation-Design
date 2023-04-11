@@ -30,8 +30,8 @@ public class EmployeeController {
 
     @RequestMapping("/workbench/administration/employee/toIndex")
     public String toIndex(Model model){
-        List<DicValue> positionList=dicValueService.queryDivValueByTypeCode("position");
-        List<DicValue> departmentList=dicValueService.queryDivValueByTypeCode("department");
+        List<DicValue> positionList=dicValueService.queryDicValueByTypeCode("position");
+        List<DicValue> departmentList=dicValueService.queryDicValueByTypeCode("department");
 
         model.addAttribute("positionList",positionList);
         model.addAttribute("departmentList",departmentList);
@@ -100,9 +100,9 @@ public class EmployeeController {
     public Object querySsTypeByPosition(String position){
         List<DicValue> ssTypeList=null;
         if(dicValueService.queryValueById(position).contains("医")){
-            ssTypeList=dicValueService.queryDivValueByTypeCode("odType");
+            ssTypeList=dicValueService.queryDicValueByTypeCode("odType");
         }else{
-            ssTypeList=dicValueService.queryDivValueByTypeCode("ssType");
+            ssTypeList=dicValueService.queryDicValueByTypeCode("ssType");
         }
         return ssTypeList;
     }
