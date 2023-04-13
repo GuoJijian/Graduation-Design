@@ -129,7 +129,7 @@
 				},
 				queryRegisteredToTreatmentByPhone:function () {
 					axios({
-						url:'/workbench/treatment/queryRegisteredToTreatmentByPhone',
+						url:'/workbench/treatment/queryRegisteredToTreatmentByPhone?i='+Math.random(),
 						method:'post',
 						params:{
 							phone:this.searchPhone
@@ -237,7 +237,7 @@
 		$(".searchRegisteredDiv a").click(function () {
 			//初始化关联挂号的模态窗口
 			vue.searchPhone="";
-			$("#registeredListTbody tr").remove();
+			vue.registeredList=[];
 			//显示关联挂号的模态窗口
 			$("#findMarketRegistered").modal("show");
 		});
@@ -420,6 +420,33 @@
 			var id=$(this).attr("beautyId");
 			//跳转页面
 			window.location.href="/workbench/beauty/toDetail?id="+id;
+		});
+
+		//解决日历显示乱码
+		$.fn.datetimepicker.dates['zh-CN'] = {
+			days: ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日"],
+			daysShort: ["周日", "周一", "周二", "周三", "周四", "周五", "周六", "周日"],
+			daysMin:  ["日", "一", "二", "三", "四", "五", "六", "日"],
+			months: ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"],
+			monthsShort: ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"],
+			today: "今天",
+			clear:"清空",
+			suffix: [],
+			meridiem: ["上午", "下午"]
+		};
+		//调用日历工具函数
+		$(".editDate").datetimepicker({
+			language:'zh-CN',//语言
+			format:'yyyy-mm-dd',//日期格式
+			minView:'month',//可选择的最小视图
+			initialDate:new Date(),//初始化时显示的日期
+			autoclose:true,//设置选择完日期后，自动关闭日历
+			todayBtn:true,//设置是否显示“今天”按钮
+			clearBtn:true//设置是否显示“清除”按钮
+		}).on('changeDate',function (event) {
+			//当时间改变时为vue的属性赋值
+			vue.startDate=$("#startDate").val();
+			vue.endDate=$("#endDate").val();
 		});
 	});
 	
@@ -625,7 +652,7 @@
 				  <div class="form-group">
 				    <div class="input-group">
 				      <div class="input-group-addon">医生名称</div>
-				      <input class="form-control" type="text" v-model="name">
+				      <input class="form-control" type="text" v-model="name" style="width: 100px">
 				    </div>
 				  </div>
 				  
@@ -642,18 +669,18 @@
 				  <div class="form-group">
 				    <div class="input-group">
 				      <div class="input-group-addon">开始时间</div>
-				      <input class="form-control" type="text" v-model="startDate">
+				      <input id="startDate" class="editDate form-control" type="text" readonly>
 				    </div>
 				  </div>
 				  
 				  <div class="form-group">
 				    <div class="input-group">
 				      <div class="input-group-addon">结束时间</div>
-						<input class="form-control" type="text" v-model="endDate">
+						<input id="endDate" class="editDate form-control" type="text" readonly>
 				    </div>
 				  </div>
 
-				  <button id="searchBeautyBtn" type="button" class="btn btn-default">查询</button>
+				  <button @click="queryBeautyForPageByCondition()" id="searchBeautyBtn" type="button" class="btn btn-default">查询</button>
 				  
 				</form>
 			</div>

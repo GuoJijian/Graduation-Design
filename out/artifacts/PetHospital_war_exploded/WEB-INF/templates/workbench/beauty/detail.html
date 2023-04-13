@@ -44,9 +44,6 @@
 		<div class="page-header">
 			<h3 th:text="${beauty.eid}">动力节点-交易01</h3>
 		</div>
-		<div style="position: relative; height: 50px; width: 500px;  top: -72px; left: 700px;">
-			<button type="button" class="btn btn-default" onclick="window.location.href='convert.html';"><span class="glyphicon glyphicon-retweet"></span> 转换</button>
-		</div>
 	</div>
 
 	<br/>
@@ -59,22 +56,22 @@
 			<div style="width: 300px; color: gray;">医生名称</div>
 			<div style="width: 300px;position: relative; left: 200px; top: -20px;"><b th:text="${beauty.eid}">zhangsan</b></div>
 			<div style="width: 300px;position: relative; left: 450px; top: -40px; color: gray;">美容种类</div>
-			<div style="width: 300px;position: relative; left: 650px; top: -60px;"><b th:text="${beauty.tDisease}">5,000</b></div>
+			<div style="width: 300px;position: relative; left: 650px; top: -60px;"><b th:text="${beauty.bDisease}">5,000</b></div>
 			<div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -60px;"></div>
 			<div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -60px; left: 450px;"></div>
 		</div>
 		<div style="position: relative; left: 40px; height: 30px; top: 10px;">
 			<div style="width: 300px; color: gray;">美容时间</div>
-			<div style="width: 300px;position: relative; left: 200px; top: -20px;"><b th:text="${beauty.tTime}">动力节点-交易01</b></div>
+			<div style="width: 300px;position: relative; left: 200px; top: -20px;"><b th:text="${beauty.bTime}">动力节点-交易01</b></div>
 			<div style="width: 300px;position: relative; left: 450px; top: -40px; color: gray;">美容费</div>
-			<div style="width: 300px;position: relative; left: 650px; top: -60px;"><b th:text="${beauty.tPrice}">2017-02-07</b></div>
+			<div style="width: 300px;position: relative; left: 650px; top: -60px;"><b th:text="${beauty.bPrice}">2017-02-07</b></div>
 			<div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -60px;"></div>
 			<div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -60px; left: 450px;"></div>
 		</div>
 		<div style="position: relative; left: 40px; height: 30px; top: 90px;">
 			<div style="width: 300px; color: gray;">美容处理</div>
 			<div style="width: 630px;position: relative; left: 200px; top: -20px;">
-				<b th:text="${beauty.tHandle}">
+				<b th:text="${beauty.bHandle}">
 					&nbsp;
 				</b>
 			</div>
@@ -83,7 +80,7 @@
 		<div style="position: relative; left: 40px; height: 30px; top: 90px;">
 			<div style="width: 300px; color: gray;">医嘱</div>
 			<div style="width: 630px;position: relative; left: 200px; top: -20px;">
-				<b th:text="${beauty.tAdvice}">
+				<b th:text="${beauty.bAdvice}">
 					&nbsp;
 				</b>
 			</div>

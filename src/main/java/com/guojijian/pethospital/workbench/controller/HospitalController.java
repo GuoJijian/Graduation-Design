@@ -12,13 +12,15 @@ import com.guojijian.pethospital.settings.pojo.PetOwner;
 import com.guojijian.pethospital.settings.service.DicValueService;
 import com.guojijian.pethospital.settings.service.PetOwnerService;
 import com.guojijian.pethospital.workbench.pojo.Hospital;
+import com.guojijian.pethospital.workbench.pojo.Registered;
 import com.guojijian.pethospital.workbench.service.HospitalService;
+import com.guojijian.pethospital.workbench.service.RegisteredService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import sun.security.krb5.internal.PAEncTSEnc;
 
 import javax.servlet.http.HttpSession;
 import java.util.Date;
@@ -35,6 +37,8 @@ public class HospitalController {
     private PetOwnerService petOwnerService;
     @Autowired
     private DicValueService dicValueService;
+    @Autowired
+    private RegisteredService registeredService;
 
     @RequestMapping("/workbench/hospital/toIndex")
     public String toIndex(Model model){
@@ -179,5 +183,21 @@ public class HospitalController {
         }
 
         return ro;
+    }
+
+    @GetMapping("/workbench/hospital/toDetail")
+    public String toDetail(String id,Model model){
+
+        Hospital hospital=hospitalService.queryHospitalById(id);
+        PetOwner petOwner = petOwnerService.queryPetOwnerById(hospital.getPid());
+        hospital.setPid(petOwner.getpUserName());
+        hospital.setpType(dicValueService.queryValueById(hospital.getpType()));
+        hospital.setpBreed(dicValueService.queryValueById(hospital.getpBreed()));
+        Registered registered = registeredService.queryRegisteredById(hospital.getRid());
+
+        model.addAttribute("hospital",hospital);
+        model.addAttribute("registered",registered);
+
+        return "workbench/hospital/detail";
     }
 }
